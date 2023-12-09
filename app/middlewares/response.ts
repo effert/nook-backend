@@ -1,5 +1,5 @@
 import { Context } from "koa"
-import { response } from "../utils"
+import { response } from "@/utils"
 
 export default async function responseFormatter(
   ctx: Context,

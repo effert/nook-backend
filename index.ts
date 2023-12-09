@@ -1,11 +1,12 @@
+import "module-alias/register"
 import Koa from "koa"
 import bodyParser from "koa-bodyparser"
 import helmet from "koa-helmet"
 import dotenv from "dotenv"
 import cors from "@koa/cors"
-import router from "./app/routes/index"
-import errorMiddleWare from "./app/middlewares/error"
-import responseFormatter from "./app/middlewares/response"
+import router from "@/routes/index"
+import errorMiddleWare from "@/middlewares/error"
+import responseFormatter from "@/middlewares/response"
 
 const app = new Koa()
 dotenv.config()

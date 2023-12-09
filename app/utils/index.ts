@@ -1,5 +1,5 @@
 import crypto from "crypto"
-import { ApiResponse } from "../types/api"
+import { ApiResponse } from "@/types/api"
 
 export function generateRandomString(length: number) {
   return crypto.randomBytes(length).toString("hex")

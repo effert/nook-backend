@@ -1,6 +1,6 @@
 import Router from "koa-router"
-import authMiddleware from "../middlewares/auth"
-import testMiddleware from "../middlewares/test"
+import authMiddleware from "@/middlewares/auth"
+import testMiddleware from "@/middlewares/test"
 import {
   getUserInfo,
   login,

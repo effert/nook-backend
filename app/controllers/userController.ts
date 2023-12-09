@@ -2,8 +2,8 @@ import { Context, Next } from "koa"
 import bcrypt from "bcrypt"
 import nodemailer from "nodemailer"
 import jwt from "jsonwebtoken"
-import UserModal from "../models/userModal"
-import { generateRandomString } from "../utils"
+import UserModal from "@/models/userModal"
+import { generateRandomString } from "@/utils"
 
 const { SECRET_KEY = "", EMAIL_HOST_USER, EMAIL_HOST_PASSWORD } = process.env
 
