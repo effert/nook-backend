@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <title>WebSocket Test</title>
+  <script>
+    let socket;
+
+    document.addEventListener('DOMContentLoaded', (event) => {
+      socket = new WebSocket('ws://localhost:9000/114');
+
+      socket.onopen = function (e) {
+        console.log("连接服务器成功");
+      };
+
+      socket.onmessage = function (event) {
+        event.data.text().then(text => {
+          document.getElementById('messages').innerHTML += `<p>${text}</p>`;
+        });
+      };
+
+      socket.onclose = function (event) {
+        if (event.wasClean) {
+          console.log(`[关闭]: Connection closed cleanly, code=${event.code} reason=${event.reason}`);
+        } else {
+          // e.g. server process killed or network down
+          console.log('[关闭]: Connection died');
+        }
+      };
+
+      socket.onerror = function (error) {
+        console.log(`[错误]: ${error.message}`);
+      };
+    });
+
+    function sendMessage() {
+      var message = document.getElementById('messageInput').value;
+      socket.send(message);
+      document.getElementById('messageInput').value = '';
+    }
+
+  </script>
+</head>
+
+<body>
+  <input type="text" id="messageInput" placeholder="输入消息">
+  <button onclick="sendMessage()">发送</button>
+  <div id="messages"></div>
+</body>
+
+</html>

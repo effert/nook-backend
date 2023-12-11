@@ -11,10 +11,32 @@ datasource db {
 }
 
 model User {
-  id    Int     @id @default(autoincrement())
-  email String  @unique // 用户账号，可以不是email
-  password String?
-  tempPassword String?
+  id                 Int       @id @default(autoincrement())
+  email              String    @unique // 用户账号，可以不是email
+  password           String?
+  tempPassword       String?
   tempPasswordExpiry BigInt?
-  name  String?
+  name               String?
+  rooms              Room[] // 关联到 Room 模型
+  Message            Message[]
+}
+
+// 定义 Room 模型
+model Room {
+  id        String    @id
+  roomName  String
+  createdAt DateTime  @default(now())
+  members   User[] // 关联到 User 模型
+  messages  Message[] // 关联到 Message 模型
+}
+
+// 定义 Message 模型
+model Message {
+  id        Int      @id @default(autoincrement())
+  content   String
+  timestamp DateTime @default(now())
+  roomId    String // 外键，指向 Room
+  room      Room     @relation(fields: [roomId], references: [id])
+  userId    Int? // 外键，指向 User
+  user      User?    @relation(fields: [userId], references: [id])
 }

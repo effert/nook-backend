@@ -1,6 +1,5 @@
-import { PrismaClient, User } from "@prisma/client"
-
-const prisma = new PrismaClient()
+import { User } from "@prisma/client"
+import prisma from "@/models"
 
 export default class UserModal {
   /**
