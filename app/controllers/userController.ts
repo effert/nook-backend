@@ -19,7 +19,7 @@ export async function login(ctx: Context) {
   }
   if (!email || !password) {
     ctx.status = 400
-    ctx.body = { error: "Please provide both email and password" }
+    ctx.body = { error: ctx.i18n.__("Please provide both email and password") }
     return
   }
   try {
@@ -31,7 +31,7 @@ export async function login(ctx: Context) {
       const token = jwt.sign({ id: user.id, email: user.email }, SECRET_KEY, {
         expiresIn: "24h",
       })
-      ctx.body = { message: "Login successful", token }
+      ctx.body = { message: ctx.i18n.__("Login successful"), token }
       return
     }
 
@@ -39,7 +39,7 @@ export async function login(ctx: Context) {
     if (user.tempPassword) {
       if (BigInt(Date.now()) > user.tempPasswordExpiry!) {
         ctx.status = 401
-        ctx.body = { error: "Temporary password expired" }
+        ctx.body = { error: ctx.i18n.__("Temporary password expired") }
         return
       }
       if (await bcrypt.compare(password, user.tempPassword!)) {
@@ -51,10 +51,10 @@ export async function login(ctx: Context) {
         const token = jwt.sign({ id: user.id, email: user.email }, SECRET_KEY, {
           expiresIn: "24h",
         })
-        ctx.body = { message: "Login successful", token }
+        ctx.body = { message: ctx.i18n.__("Login successful"), token }
       } else {
         ctx.status = 401
-        ctx.body = { error: "Invalid password" }
+        ctx.body = { error: ctx.i18n.__("Invalid password") }
       }
       return
     }
@@ -63,15 +63,16 @@ export async function login(ctx: Context) {
       const token = jwt.sign({ id: user.id, email: user.email }, SECRET_KEY, {
         expiresIn: "24h",
       })
-      ctx.body = { message: "Login successful", token }
+      console.log("Current locale:", ctx.i18n.locale)
+      ctx.body = { message: ctx.i18n.__("Login successful"), token }
     } else {
       ctx.status = 401
-      ctx.body = { error: "Invalid password" }
+      ctx.body = { error: ctx.i18n.__("Invalid password") }
     }
   } catch (err) {
     ctx.status = 500
     console.log(212, err)
-    ctx.body = { error: "Internal server error" }
+    ctx.body = { error: ctx.i18n.__("Internal server error") }
   }
 }
 
@@ -109,7 +110,7 @@ export async function generateRandomPassword(ctx: Context) {
   const hashedPassword = await bcrypt.hash(randomPassword, 10)
   if (ctx.query.email === undefined) {
     ctx.status = 400
-    ctx.body = { error: "Please provide email" }
+    ctx.body = { error: ctx.i18n.__("Please provide email") }
     return
   }
   const email =
@@ -117,7 +118,7 @@ export async function generateRandomPassword(ctx: Context) {
   const user = await UserModal.getUserInfo(email)
   if (!user) {
     ctx.status = 401
-    ctx.body = { error: "User not found" }
+    ctx.body = { error: ctx.i18n.__("User not found") }
     return
   }
   await UserModal.updateUser(user.email, {
@@ -127,7 +128,7 @@ export async function generateRandomPassword(ctx: Context) {
   // TODO FIXME connect ETIMEDOUT 64.233.188.108:465
   // let sendResp = await sendTemporaryPassword(user.email, randomPassword)
   ctx.body = {
-    message: "Temporary password generated",
+    message: ctx.i18n.__("Temporary password generated"),
     randomPassword,
   }
 }
@@ -141,13 +142,12 @@ export async function getUserInfo(ctx: Context) {
   const user = await UserModal.getUserInfo(ctx.state.user.email)
   if (!user) {
     ctx.status = 401
-    ctx.body = { error: "User not found" }
+    ctx.body = { error: ctx.i18n.__("User not found") }
     return
   }
 
   user.password = null
   ctx.body = {
-    message: "This is a protected route",
     user,
   }
 }

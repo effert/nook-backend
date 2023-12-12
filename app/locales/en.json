@@ -1,0 +1,15 @@
+{
+  "Message imported": "Message imported",
+  "Invalid file upload": "Invalid file upload",
+  "Message deleted": "Message deleted",
+  "Please provide both email and password": "Please provide both email and password",
+  "Login successful": "Login successful",
+  "Temporary password expired": "Temporary password expired",
+  "Invalid password": "Invalid password",
+  "Internal server error": "Internal server error",
+  "Please provide email": "Please provide email",
+  "User not found": "User not found",
+  "Temporary password generated": "Temporary password generated",
+  "Access denied": "Access denied",
+  "Authentication required": "Authentication required"
+}

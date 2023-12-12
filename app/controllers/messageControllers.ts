@@ -45,10 +45,10 @@ export async function importMessage(ctx: Context) {
     }
     await MessageModal.importRoomMessage(messages)
 
-    ctx.body = "消息已导入"
+    ctx.body = ctx.__("Message imported")
   } else {
     ctx.status = 400
-    ctx.body = "无效的文件上传"
+    ctx.body = ctx.__("Invalid file upload")
   }
 }
 
@@ -59,5 +59,5 @@ export async function importMessage(ctx: Context) {
 export async function deleteRoomMessage(ctx: Context) {
   const { roomId } = ctx.request.body as { roomId: string }
   await MessageModal.deleteRoomMessage(roomId)
-  ctx.body = "消息已删除"
+  ctx.body = ctx.__("Message deleted")
 }

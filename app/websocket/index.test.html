@@ -8,7 +8,7 @@
     let socket;
 
     document.addEventListener('DOMContentLoaded', (event) => {
-      socket = new WebSocket('ws://localhost:9000/114');
+      socket = new WebSocket('ws://localhost:9000/7bd8ae5b00fa78df');
 
       socket.onopen = function (e) {
         console.log("连接服务器成功");
@@ -63,7 +63,7 @@
     if (fileInput.files.length > 0) {
       formData.append('file', fileInput.files[0]);
 
-      fetch('http://localhost:8000/message/import?roomId=7bd8ae5b00fa78df', {
+      fetch('http://localhost:8000/message/import?roomId=a6f178071408076a', {
         method: 'POST',
         body: formData
       })

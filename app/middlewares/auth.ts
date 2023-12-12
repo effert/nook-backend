@@ -12,10 +12,10 @@ export default async function authenticateToken(ctx: Context, next: Next) {
       await next()
     } catch (error) {
       ctx.status = 403
-      ctx.body = { error: "Access denied" }
+      ctx.body = { error: ctx.__("Access denied") }
     }
   } else {
     ctx.status = 401
-    ctx.body = { error: "Authentication required" }
+    ctx.body = { error: ctx.__("Authentication required") }
   }
 }
