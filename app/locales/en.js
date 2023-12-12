@@ -1,3 +1,0 @@
-{
-	"Login successful": "Login successful"
-}

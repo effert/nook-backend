@@ -1,2 +1,1 @@
-declare module "koa-i18n"
-declare module "koa-locale"
+declare module "koa-locales"
