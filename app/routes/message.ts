@@ -1,6 +1,10 @@
 import Router from "koa-router"
 import koaBody from "koa-body"
-import { exportMessage, importMessage } from "@/controllers/messageControllers"
+import {
+  exportMessage,
+  importMessage,
+  deleteRoomMessage,
+} from "@/controllers/messageControllers"
 
 const router = new Router({
   prefix: "/message",
@@ -20,5 +24,11 @@ router.post("/export", exportMessage)
  * @returns
  */
 router.post("/import", koaBody({ multipart: true }), importMessage)
+
+/**
+ * 删除房间内所有消息
+ * @param roomId
+ */
+router.delete("/room-delete", deleteRoomMessage)
 
 export default router

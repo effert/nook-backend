@@ -47,6 +47,34 @@
   <input type="text" id="messageInput" placeholder="输入消息">
   <button onclick="sendMessage()">发送</button>
   <div id="messages"></div>
+  <form id="uploadForm">
+    <input type="file" name="file" />
+    <button type="submit">上传文件</button>
+  </form>
+
 </body>
+<script>
+  document.getElementById('uploadForm').addEventListener('submit', function (e) {
+    e.preventDefault();
+
+    const formData = new FormData();
+    const fileInput = document.querySelector('input[type="file"]');
+
+    if (fileInput.files.length > 0) {
+      formData.append('file', fileInput.files[0]);
+
+      fetch('http://localhost:8000/message/import?roomId=7bd8ae5b00fa78df', {
+        method: 'POST',
+        body: formData
+      })
+        .then(response => response.json())
+        .then(data => console.log(data))
+        .catch(error => console.error('Error:', error));
+    } else {
+      console.log('No file selected.');
+    }
+  });
+
+</script>
 
 </html>

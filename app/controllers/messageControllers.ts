@@ -30,24 +30,34 @@ export async function exportMessage(ctx: Context) {
  * @returns
  */
 export async function importMessage(ctx: Context) {
-  const roomId = ctx.params.roomId
+  const roomId = ctx.query.roomId
   const files = ctx.request.files!.file
 
   // 检查 file 是单个文件还是文件数组
   const file = Array.isArray(files) ? files[0] : files
 
-  if (file && file.path) {
-    const fileContent = fs.readFileSync(file.path, "utf8")
+  if (file && file.filepath) {
+    const fileContent = fs.readFileSync(file.filepath, "utf8")
     const messages = JSON.parse(fileContent)
 
     for (const message of messages) {
       message.roomId = roomId
     }
-    MessageModal.importRoomMessage(messages)
+    await MessageModal.importRoomMessage(messages)
 
     ctx.body = "消息已导入"
   } else {
     ctx.status = 400
     ctx.body = "无效的文件上传"
   }
+}
+
+/**
+ * 删除房间内所有消息
+ * @param roomId
+ */
+export async function deleteRoomMessage(ctx: Context) {
+  const { roomId } = ctx.request.body as { roomId: string }
+  await MessageModal.deleteRoomMessage(roomId)
+  ctx.body = "消息已删除"
 }
