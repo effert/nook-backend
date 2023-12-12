@@ -11,5 +11,6 @@
   "User not found": "User not found",
   "Temporary password generated": "Temporary password generated",
   "Access denied": "Access denied",
-  "Authentication required": "Authentication required"
+  "Authentication required": "Authentication required",
+  "Room not found": "Room not found"
 }

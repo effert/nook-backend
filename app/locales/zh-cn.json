@@ -11,5 +11,6 @@
   "User not found": "未找到用户",
   "Temporary password generated": "生成临时密码",
   "Access denied": "拒绝访问",
-  "Authentication required": "认证要求"
+  "Authentication required": "认证要求",
+  "Room not found": "未找到房间"
 }

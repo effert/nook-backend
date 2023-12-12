@@ -1,5 +1,5 @@
 import Router from "koa-router"
-import { createRoom } from "@/controllers/roomControllers"
+import { createRoom, getRoomInfo } from "@/controllers/roomControllers"
 
 const router = new Router({
   prefix: "/room",
@@ -10,5 +10,11 @@ const router = new Router({
  * @returns
  */
 router.post("/create", createRoom)
+
+/**
+ * 获取房间信息
+ * @returns
+ */
+router.get("/:id", getRoomInfo)
 
 export default router

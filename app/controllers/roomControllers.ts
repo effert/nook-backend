@@ -24,3 +24,22 @@ export async function createRoom(ctx: Context) {
     data: room,
   }
 }
+
+/**
+ * 获取房间信息
+ * @param ctx
+ * @returns
+ */
+export async function getRoomInfo(ctx: Context) {
+  const { id } = ctx.params
+  const room = await RoomModal.getRoomInfo(id)
+  if (!room) {
+    ctx.status = 404
+    ctx.body = { error: ctx.__("Room not found") }
+    return
+  }
+  ctx.body = {
+    code: 200,
+    data: room,
+  }
+}
