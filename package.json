@@ -1,7 +1,7 @@
 {
-  "name": "anonymity-backend",
+  "name": "nook-backend",
   "version": "0.0.1",
-  "description": "anonymity api server",
+  "description": "nook api server",
   "main": "index.js",
   "author": "effert",
   "license": "MIT",
