@@ -1,4 +1,4 @@
-import { Context } from "koa"
+import { Context, Next } from "koa"
 import RoomModal from "@/models/roomModal"
 import { generateRandomString } from "@/utils"
 
@@ -11,7 +11,7 @@ import { generateRandomString } from "@/utils"
  * 然后创建房间
  * 返回房间信息
  */
-export async function createRoom(ctx: Context) {
+export async function createRoom(ctx: Context, next: Next) {
   let id = generateRandomString(8)
   let roomInfo = await RoomModal.getRoomInfo(id)
   while (roomInfo) {
@@ -23,6 +23,7 @@ export async function createRoom(ctx: Context) {
     code: 200,
     data: room,
   }
+  return next()
 }
 
 /**
@@ -30,16 +31,17 @@ export async function createRoom(ctx: Context) {
  * @param ctx
  * @returns
  */
-export async function getRoomInfo(ctx: Context) {
+export async function getRoomInfo(ctx: Context, next: Next) {
   const { id } = ctx.params
   const room = await RoomModal.getRoomInfo(id)
   if (!room) {
     ctx.status = 404
     ctx.body = { error: ctx.__("Room not found") }
-    return
+    return next()
   }
   ctx.body = {
     code: 200,
     data: room,
   }
+  return next()
 }

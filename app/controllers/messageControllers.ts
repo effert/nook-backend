@@ -1,4 +1,4 @@
-import { Context } from "koa"
+import { Context, Next } from "koa"
 import fs from "fs"
 import path from "path"
 import MessageModal from "@/models/messageModal"
@@ -9,7 +9,7 @@ import MessageModal from "@/models/messageModal"
  * @returns
  */
 
-export async function exportMessage(ctx: Context) {
+export async function exportMessage(ctx: Context, next: Next) {
   const { roomId } = ctx.request.body as { roomId: string }
   const allMessage = await MessageModal.getRoomMessage(roomId)
   const formattedData = JSON.stringify(allMessage)
@@ -21,6 +21,7 @@ export async function exportMessage(ctx: Context) {
   ctx.set("Content-disposition", `attachment; filename=${filename}`)
   ctx.set("Content-Type", "application/json")
   ctx.body = fs.createReadStream(filePath)
+  return next()
 }
 
 /**
@@ -29,7 +30,7 @@ export async function exportMessage(ctx: Context) {
  * @param files
  * @returns
  */
-export async function importMessage(ctx: Context) {
+export async function importMessage(ctx: Context, next: Next) {
   const roomId = ctx.query.roomId
   const files = ctx.request.files!.file
 
@@ -50,14 +51,16 @@ export async function importMessage(ctx: Context) {
     ctx.status = 400
     ctx.body = ctx.__("Invalid file upload")
   }
+  return next()
 }
 
 /**
  * 删除房间内所有消息
  * @param roomId
  */
-export async function deleteRoomMessage(ctx: Context) {
+export async function deleteRoomMessage(ctx: Context, next: Next) {
   const { roomId } = ctx.request.body as { roomId: string }
   await MessageModal.deleteRoomMessage(roomId)
   ctx.body = ctx.__("Message deleted")
+  return next()
 }

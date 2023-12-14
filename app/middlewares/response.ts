@@ -11,7 +11,8 @@ export default async function responseFormatter(
 
     // 如果有响应数据，则应用统一格式
     if (ctx.body !== undefined) {
-      ctx.body = response(true, "Success", ctx.body)
+      const isSuccess = ctx.status === 200
+      ctx.body = response(isSuccess, "", ctx.body)
     }
   } catch (err: any) {
     // 错误处理

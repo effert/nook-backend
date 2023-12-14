@@ -12,7 +12,7 @@ const { SECRET_KEY = "", EMAIL_HOST_USER, EMAIL_HOST_PASSWORD } = process.env
  * @param ctx
  * @returns
  */
-export async function login(ctx: Context) {
+export async function login(ctx: Context, next: Next) {
   const { email, password } = ctx.request.body as {
     email: string
     password: string
@@ -20,7 +20,7 @@ export async function login(ctx: Context) {
   if (!email || !password) {
     ctx.status = 400
     ctx.body = { error: ctx.__("Please provide both email and password") }
-    return
+    return next()
   }
   try {
     let user = await UserModal.getUserInfo(email)
@@ -32,7 +32,7 @@ export async function login(ctx: Context) {
         expiresIn: "24h",
       })
       ctx.body = { message: ctx.__("Login successful"), token }
-      return
+      return next()
     }
 
     // 临时密码
@@ -40,7 +40,7 @@ export async function login(ctx: Context) {
       if (BigInt(Date.now()) > user.tempPasswordExpiry!) {
         ctx.status = 401
         ctx.body = { error: ctx.__("Temporary password expired") }
-        return
+        return next()
       }
       if (await bcrypt.compare(password, user.tempPassword!)) {
         // 清除临时密码
@@ -56,7 +56,7 @@ export async function login(ctx: Context) {
         ctx.status = 401
         ctx.body = { error: ctx.__("Invalid password") }
       }
-      return
+      return next()
     }
     // 正常密码
     if (await bcrypt.compare(password, user.password!)) {
@@ -68,10 +68,11 @@ export async function login(ctx: Context) {
       ctx.status = 401
       ctx.body = { error: ctx.__("Invalid password") }
     }
+    return next()
   } catch (err) {
     ctx.status = 500
-    console.log(212, err)
     ctx.body = { error: ctx.__("Internal server error") }
+    return next()
   }
 }
 
@@ -104,13 +105,13 @@ async function sendTemporaryPassword(email: string, tempPassword: string) {
  * @param ctx
  * @returns
  */
-export async function generateRandomPassword(ctx: Context) {
+export async function generateRandomPassword(ctx: Context, next: Next) {
   const randomPassword = generateRandomString(8)
   const hashedPassword = await bcrypt.hash(randomPassword, 10)
   if (ctx.query.email === undefined) {
     ctx.status = 400
     ctx.body = { error: ctx.__("Please provide email") }
-    return
+    return next()
   }
   const email =
     typeof ctx.query.email === "object" ? ctx.query.email[0] : ctx.query.email
@@ -118,7 +119,7 @@ export async function generateRandomPassword(ctx: Context) {
   if (!user) {
     ctx.status = 401
     ctx.body = { error: ctx.__("User not found") }
-    return
+    return next()
   }
   await UserModal.updateUser(user.email, {
     tempPassword: hashedPassword,
@@ -130,6 +131,7 @@ export async function generateRandomPassword(ctx: Context) {
     message: ctx.__("Temporary password generated"),
     randomPassword,
   }
+  return next()
 }
 
 /**
@@ -137,16 +139,17 @@ export async function generateRandomPassword(ctx: Context) {
  * @param ctx
  * @returns
  */
-export async function getUserInfo(ctx: Context) {
+export async function getUserInfo(ctx: Context, next: Next) {
   const user = await UserModal.getUserInfo(ctx.state.user.email)
   if (!user) {
     ctx.status = 401
     ctx.body = { error: ctx.__("User not found") }
-    return
+    return next()
   }
 
   user.password = null
   ctx.body = {
     user,
   }
+  return next()
 }
