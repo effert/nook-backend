@@ -27,7 +27,7 @@ export async function login(ctx: Context, next: Next) {
     if (!user) {
       // 未注册的用户直接注册并登录
       const hashedPassword = await bcrypt.hash(password, 10)
-      user = await UserModal.createUser(email, hashedPassword)
+      user = await UserModal.createUser(email, { password: hashedPassword })
       const token = jwt.sign({ id: user.id, email: user.email }, SECRET_KEY, {
         expiresIn: "24h",
       })
@@ -115,13 +115,15 @@ export async function generateRandomPassword(ctx: Context, next: Next) {
   }
   const email =
     typeof ctx.query.email === "object" ? ctx.query.email[0] : ctx.query.email
-  const user = await UserModal.getUserInfo(email)
+  let user = await UserModal.getUserInfo(email)
+
+  let method = "updateUser"
   if (!user) {
-    ctx.status = 401
-    ctx.body = { error: ctx.__("User not found") }
-    return next()
+    // 未注册的用户直接注册
+    method = "createUser"
   }
-  await UserModal.updateUser(user.email, {
+
+  user = await UserModal[method](email, {
     tempPassword: hashedPassword,
     tempPasswordExpiry: BigInt(Date.now() + 15 * 60 * 1000), // 15分钟后过期
   })

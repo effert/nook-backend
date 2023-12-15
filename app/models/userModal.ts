@@ -21,11 +21,11 @@ export default class UserModal {
    * @param password
    * @returns
    */
-  static async createUser(email: string, password: string) {
+  static async createUser(email: string, updateData: Partial<User>) {
     const newUser = await prisma.user.create({
       data: {
         email,
-        password,
+        ...updateData,
       },
     })
     return newUser
