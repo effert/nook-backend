@@ -61,4 +61,21 @@ export default class RoomModal {
     })
     return newRoom
   }
+
+  /**
+   * 获取用户所在的所有房间
+   * @param email
+   * @returns
+   */
+  static async getRooms(email: string) {
+    return prisma.room.findMany({
+      where: {
+        members: {
+          some: {
+            email,
+          },
+        },
+      },
+    })
+  }
 }

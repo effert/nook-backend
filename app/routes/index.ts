@@ -4,7 +4,8 @@ import {
   getUserInfo,
   login,
   generateRandomPassword,
-} from "../controllers/userController"
+  getRooms,
+} from "@/controllers/userController"
 
 const router = new Router()
 
@@ -25,5 +26,11 @@ router.get("/generate-temp-password", generateRandomPassword)
  * @param id 用户id
  */
 router.get("/user-info", authMiddleware, getUserInfo)
+
+/**
+ * 获取用户所在的所有房间
+ * @returns
+ */
+router.get("/user/rooms", authMiddleware, getRooms)
 
 export default router

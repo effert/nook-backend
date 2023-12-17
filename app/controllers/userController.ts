@@ -3,6 +3,7 @@ import bcrypt from "bcrypt"
 import nodemailer from "nodemailer"
 import jwt from "jsonwebtoken"
 import UserModal from "@/models/userModal"
+import RoomModal from "@/models/roomModal"
 import { generateRandomString } from "@/utils"
 
 const { SECRET_KEY = "", EMAIL_HOST_USER, EMAIL_HOST_PASSWORD } = process.env
@@ -152,6 +153,21 @@ export async function getUserInfo(ctx: Context, next: Next) {
   user.password = null
   ctx.body = {
     user,
+  }
+  return next()
+}
+
+/**
+ * 获取用户所在的所有房间
+ * @param ctx
+ * @returns
+ */
+export async function getRooms(ctx: Context, next: Next) {
+  const { email } = ctx.state.user
+  const rooms = await RoomModal.getRooms(email)
+  ctx.body = {
+    code: 200,
+    data: rooms,
   }
   return next()
 }
