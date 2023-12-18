@@ -34,8 +34,8 @@ const { SECRET_KEY = "" } = process.env
  */
 async function getUser(request: IncomingMessage) {
   const parameters = request.url ? url.parse(request.url, true).query : {}
-  const authorization = parameters.authorization || ""
-  if (typeof authorization !== "string" || !authorization) {
+  const authorization = parameters.authorization
+  if (typeof authorization !== "string" || authorization === "null") {
     return null
   }
   const token = authorization.split(" ")[1]
@@ -88,7 +88,6 @@ export default function createWebsocket() {
     })
 
     ws.on("message", async function incoming(message) {
-      console.log(`${roomId}收到消息： ${message}`)
       if (rooms[roomId]) {
         // xxx: 这里可以做一些消息过滤，比如敏感词过滤
         // 创建消息
@@ -109,7 +108,7 @@ export default function createWebsocket() {
       }
     })
 
-    ws.on("close", () => {
+    ws.on("close", (err) => {
       if (rooms[roomId]) {
         rooms[roomId].delete(ws)
         // 广播用户离开房间
@@ -126,10 +125,10 @@ export default function createWebsocket() {
         })
         if (rooms[roomId].size === 0) {
           delete rooms[roomId]
-          // 删除房间
-          RoomModal.deleteRoom(roomId)
           // 删除房间内所有消息
-          MessageModal.deleteRoomMessage(roomId)
+          // MessageModal.deleteRoomMessage(roomId)
+          // 删除房间
+          // RoomModal.deleteRoom(roomId)
         }
         console.log(`${roomId}客户端已断开连接`)
       }

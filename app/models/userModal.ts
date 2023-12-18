@@ -46,4 +46,20 @@ export default class UserModal {
     })
     return newUser
   }
+
+  /**
+   * 获取用户所在的所有房间
+   * @param email
+   * returns
+   */
+  static async getUserRooms(email: string) {
+    return prisma.user.findUnique({
+      where: {
+        email,
+      },
+      select: {
+        rooms: true,
+      },
+    })
+  }
 }

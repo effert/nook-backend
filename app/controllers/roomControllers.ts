@@ -45,3 +45,30 @@ export async function getRoomInfo(ctx: Context, next: Next) {
   }
   return next()
 }
+
+/**
+ * 修改房间信息
+ * @param ctx
+ * @returns
+ */
+
+export async function modifyRoomInfo(ctx: Context, next: Next) {
+  const { id } = ctx.params
+  const { roomName } = ctx.request.body as {
+    roomName: string
+  }
+  const room = await RoomModal.getRoomInfo(id)
+  if (!room) {
+    ctx.status = 404
+    ctx.body = { error: ctx.__("Room not found") }
+    return next()
+  }
+  const updatedRoom = await RoomModal.updateRoom(id, {
+    roomName,
+  })
+  ctx.body = {
+    code: 200,
+    data: updatedRoom,
+  }
+  return next()
+}
