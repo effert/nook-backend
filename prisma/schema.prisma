@@ -15,7 +15,7 @@ model User {
   email              String    @unique // 用户账号，可以不是email
   password           String?
   tempPassword       String?
-  tempPasswordExpiry BigInt?
+  tempPasswordExpiry DateTime?
   name               String?
   avatar             String?
   rooms              Room[] // 关联到 Room 模型

@@ -41,7 +41,7 @@ export async function login(ctx: Context, next: Next) {
 
     // 临时密码
     if (user.tempPassword) {
-      if (BigInt(Date.now()) > user.tempPasswordExpiry!) {
+      if (user.tempPasswordExpiry && user.tempPasswordExpiry < new Date()) {
         ctx.status = 401
         ctx.body = { error: ctx.__("Temporary password expired") }
         return next()
@@ -55,7 +55,6 @@ export async function login(ctx: Context, next: Next) {
         const token = jwt.sign({ id: user.id, email: user.email }, SECRET_KEY, {
           expiresIn: "24h",
         })
-        user.tempPasswordExpiry = "11111" as unknown as bigint
         ctx.body = { message: ctx.__("Login successful"), token, user }
       } else {
         ctx.status = 401
@@ -130,7 +129,7 @@ export async function generateRandomPassword(ctx: Context, next: Next) {
 
   user = await UserModal[method](email, {
     tempPassword: hashedPassword,
-    tempPasswordExpiry: BigInt(Date.now() + 15 * 60 * 1000), // 15分钟后过期
+    tempPasswordExpiry: new Date(Date.now() + 15 * 60 * 1000),
   })
   // TODO FIXME connect ETIMEDOUT 64.233.188.108:465
   // let sendResp = await sendTemporaryPassword(user.email, randomPassword)
