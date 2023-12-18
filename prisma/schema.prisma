@@ -17,6 +17,7 @@ model User {
   tempPassword       String?
   tempPasswordExpiry BigInt?
   name               String?
+  avatar             String?
   rooms              Room[] // 关联到 Room 模型
   Message            Message[]
 }

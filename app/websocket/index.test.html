@@ -8,16 +8,16 @@
     let socket;
 
     document.addEventListener('DOMContentLoaded', (event) => {
-      socket = new WebSocket('ws://localhost:9000/7bd8ae5b00fa78df');
+      socket = new WebSocket('ws://localhost:9000/9af5ba15?authorization=bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6NCwiZW1haWwiOiIxMjA0Njc2NTgwQHFxLmNvbSIsImlhdCI6MTcwMjg4NTc5NiwiZXhwIjoxNzAyOTcyMTk2fQ.KQOBM20szawkEbliMWH0aFo9L7JhEzRDz3_CNQnVSgU');
 
       socket.onopen = function (e) {
         console.log("连接服务器成功");
       };
 
       socket.onmessage = function (event) {
-        event.data.text().then(text => {
-          document.getElementById('messages').innerHTML += `<p>${text}</p>`;
-        });
+        const obj = JSON.parse(event.data);
+        const text = obj.content;
+        document.getElementById('messages').innerHTML += `<p>${text}</p>`;
       };
 
       socket.onclose = function (event) {

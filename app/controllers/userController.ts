@@ -28,11 +28,14 @@ export async function login(ctx: Context, next: Next) {
     if (!user) {
       // 未注册的用户直接注册并登录
       const hashedPassword = await bcrypt.hash(password, 10)
-      user = await UserModal.createUser(email, { password: hashedPassword })
+      user = await UserModal.createUser(email, {
+        password: hashedPassword,
+        name: email,
+      })
       const token = jwt.sign({ id: user.id, email: user.email }, SECRET_KEY, {
         expiresIn: "24h",
       })
-      ctx.body = { message: ctx.__("Login successful"), token }
+      ctx.body = { message: ctx.__("Login successful"), token, user }
       return next()
     }
 
@@ -52,7 +55,8 @@ export async function login(ctx: Context, next: Next) {
         const token = jwt.sign({ id: user.id, email: user.email }, SECRET_KEY, {
           expiresIn: "24h",
         })
-        ctx.body = { message: ctx.__("Login successful"), token }
+        user.tempPasswordExpiry = "11111" as unknown as bigint
+        ctx.body = { message: ctx.__("Login successful"), token, user }
       } else {
         ctx.status = 401
         ctx.body = { error: ctx.__("Invalid password") }
@@ -64,7 +68,7 @@ export async function login(ctx: Context, next: Next) {
       const token = jwt.sign({ id: user.id, email: user.email }, SECRET_KEY, {
         expiresIn: "24h",
       })
-      ctx.body = { message: ctx.__("Login successful"), token }
+      ctx.body = { message: ctx.__("Login successful"), token, user }
     } else {
       ctx.status = 401
       ctx.body = { error: ctx.__("Invalid password") }

@@ -12,10 +12,10 @@ import { generateRandomString } from "@/utils"
  * 返回房间信息
  */
 export async function createRoom(ctx: Context, next: Next) {
-  let id = generateRandomString(8)
+  let id = generateRandomString(3)
   let roomInfo = await RoomModal.getRoomInfo(id)
   while (roomInfo) {
-    id = generateRandomString(8)
+    id = generateRandomString(4)
     roomInfo = await RoomModal.getRoomInfo(id)
   }
   const room = await RoomModal.createRoom(id)

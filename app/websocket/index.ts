@@ -5,6 +5,8 @@ import url from "url"
 import jwt, { JwtPayload } from "jsonwebtoken"
 import RoomModal from "@/models/roomModal"
 import MessageModal from "@/models/messageModal"
+import UserModal from "@/models/userModal"
+import { User } from "@prisma/client"
 
 const server = http.createServer()
 const wss = new WebSocket.Server({ noServer: true })
@@ -12,6 +14,14 @@ const PORT = process.env.SOCKET_PORT || 8080
 
 interface Room {
   [roomId: string]: Set<WebSocket>
+}
+type TMessageType = "text" | "image" | "file" | "member" // member 表示成员变动
+type TMessage = {
+  type: TMessageType
+  content: string // type 为 member 时,content 为成员变动的类型(join,leave)
+  sender: User | null // type 为 member 时, sender 为成员名 null说明是匿名用户
+  time: number
+  isSelf?: boolean
 }
 
 let rooms: Room = {}
@@ -21,17 +31,18 @@ const { SECRET_KEY = "" } = process.env
  * @param request
  * @returns
  * @description
- * 从请求头中获取 token，然后解析 token 获取用户信息
  */
-function getUser(request: IncomingMessage) {
+async function getUser(request: IncomingMessage) {
   const parameters = request.url ? url.parse(request.url, true).query : {}
-  const token = parameters.token || ""
-  if (typeof token !== "string" || !token) {
-    return {}
+  const authorization = parameters.authorization || ""
+  if (typeof authorization !== "string" || !authorization) {
+    return null
   }
-  const token1 = token.split(" ")[1]
-  const user = jwt.verify(token1, SECRET_KEY)
-  return user
+  const token = authorization.split(" ")[1]
+
+  const user = jwt.verify(token, SECRET_KEY) as JwtPayload
+  const userInfo = await UserModal.getUserInfo(user.email)
+  return userInfo
 }
 /**
  * 获取房间 id
@@ -49,7 +60,7 @@ function getRoomId(request: IncomingMessage) {
 export default function createWebsocket() {
   wss.on("connection", async function connection(ws, request: IncomingMessage) {
     const roomId: string = getRoomId(request)
-    const user = getUser(request)
+    const user = await getUser(request)
 
     const roomInfo = await RoomModal.getRoomInfo(roomId)
     if (!roomInfo) {
@@ -59,24 +70,40 @@ export default function createWebsocket() {
       ws.close()
       return
     }
-    console.log(`客户端${roomId}已连接:`)
     rooms[roomId] = rooms[roomId] || new Set()
     rooms[roomId].add(ws)
+
+    console.log(`客户端${roomId}已连接:`)
+    // 广播用户进入房间
+    rooms[roomId].forEach((client) => {
+      if (client.readyState === WebSocket.OPEN) {
+        const newMessage: TMessage = {
+          type: "member",
+          content: "join",
+          sender: user,
+          time: Date.now(),
+        }
+        client.send(JSON.stringify(newMessage))
+      }
+    })
 
     ws.on("message", async function incoming(message) {
       console.log(`${roomId}收到消息： ${message}`)
       if (rooms[roomId]) {
         // xxx: 这里可以做一些消息过滤，比如敏感词过滤
         // 创建消息
-        await MessageModal.createMessage(
-          message.toString(),
-          roomId,
-          typeof user === "string" ? undefined : user.id
-        )
+        await MessageModal.createMessage(message.toString(), roomId, user?.id)
         // 广播消息
         rooms[roomId].forEach((client) => {
-          if (client !== ws && client.readyState === WebSocket.OPEN) {
-            client.send(message)
+          if (client.readyState === WebSocket.OPEN) {
+            const newMessage: TMessage = {
+              type: "text",
+              content: message.toString(),
+              sender: user,
+              isSelf: client === ws,
+              time: Date.now(),
+            }
+            client.send(JSON.stringify(newMessage))
           }
         })
       }
@@ -85,9 +112,23 @@ export default function createWebsocket() {
     ws.on("close", () => {
       if (rooms[roomId]) {
         rooms[roomId].delete(ws)
+        // 广播用户离开房间
+        rooms[roomId].forEach((client) => {
+          if (client.readyState === WebSocket.OPEN) {
+            const newMessage: TMessage = {
+              type: "member",
+              content: "leave",
+              sender: user,
+              time: Date.now(),
+            }
+            client.send(JSON.stringify(newMessage))
+          }
+        })
         if (rooms[roomId].size === 0) {
           delete rooms[roomId]
+          // 删除房间
           RoomModal.deleteRoom(roomId)
+          // 删除房间内所有消息
           MessageModal.deleteRoomMessage(roomId)
         }
         console.log(`${roomId}客户端已断开连接`)
