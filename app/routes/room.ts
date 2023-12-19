@@ -3,6 +3,7 @@ import {
   createRoom,
   getRoomInfo,
   modifyRoomInfo,
+  getRoomMembers,
 } from "@/controllers/roomControllers"
 
 const router = new Router({
@@ -26,4 +27,11 @@ router.get("/:id", getRoomInfo)
  * @returns
  */
 router.put("/:id", modifyRoomInfo)
+
+/**
+ * 获取房间内所有成员
+ * @returns
+ */
+router.get("/:id/users", getRoomMembers)
+
 export default router

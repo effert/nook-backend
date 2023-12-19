@@ -72,3 +72,23 @@ export async function modifyRoomInfo(ctx: Context, next: Next) {
   }
   return next()
 }
+
+/**
+ * 获取房间内所有成员
+ * @param ctx
+ * @returns
+ */
+export async function getRoomMembers(ctx: Context, next: Next) {
+  const { id } = ctx.params
+  const members = await RoomModal.getRoomMembers(id)
+  ctx.body = {
+    code: 200,
+    data: members?.map((member) => ({
+      id: member.id,
+      email: member.email,
+      name: member.name,
+      avatar: member.avatar,
+    })),
+  }
+  return next()
+}
