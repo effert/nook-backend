@@ -109,13 +109,13 @@ async function sendTemporaryPassword(email: string, tempPassword: string) {
  * @returns
  */
 export async function generateRandomPassword(ctx: Context, next: Next) {
-  const randomPassword = generateRandomString(8)
-  const hashedPassword = await bcrypt.hash(randomPassword, 10)
   if (ctx.query.email === undefined) {
     ctx.status = 400
     ctx.body = { error: ctx.__("Please provide email") }
     return next()
   }
+  const randomPassword = generateRandomString(8)
+  const hashedPassword = await bcrypt.hash(randomPassword, 10)
   const email =
     typeof ctx.query.email === "object" ? ctx.query.email[0] : ctx.query.email
   let user = await UserModal.getUserInfo(email)

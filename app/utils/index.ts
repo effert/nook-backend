@@ -26,7 +26,7 @@ export async function executeWithRetry(operation, maxRetries = 3) {
     } catch (error: any) {
       if (error.message.includes("write conflict") && attempt < maxRetries) {
         // 可以在这里添加一些延迟（例如使用 setTimeout）
-        await new Promise((resolve) => setTimeout(resolve, 1000))
+        await new Promise((resolve) => setTimeout(resolve, 500))
         continue
       }
       throw error
