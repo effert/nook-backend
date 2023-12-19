@@ -1,6 +1,7 @@
 import { Context, Next } from "koa"
 import RoomModal from "@/models/roomModal"
 import { generateRandomString } from "@/utils"
+import bcrypt from "bcrypt"
 
 /**
  * 新增一个房间
@@ -33,15 +34,24 @@ export async function createRoom(ctx: Context, next: Next) {
  */
 export async function getRoomInfo(ctx: Context, next: Next) {
   const { id } = ctx.params
+  const { password } = ctx.query
   const room = await RoomModal.getRoomInfo(id)
   if (!room) {
     ctx.status = 404
     ctx.body = { error: ctx.__("Room not found") }
     return next()
   }
+  let isPasswordCorrect = true
+  if (room.password) {
+    isPasswordCorrect = await bcrypt.compare(password as string, room.password)
+  }
+  const data = {
+    ...room,
+    isPasswordCorrect,
+  }
   ctx.body = {
     code: 200,
-    data: room,
+    data,
   }
   return next()
 }
@@ -54,8 +64,9 @@ export async function getRoomInfo(ctx: Context, next: Next) {
 
 export async function modifyRoomInfo(ctx: Context, next: Next) {
   const { id } = ctx.params
-  const { roomName } = ctx.request.body as {
+  const { roomName, password } = ctx.request.body as {
     roomName: string
+    password: string
   }
   const room = await RoomModal.getRoomInfo(id)
   if (!room) {
@@ -65,6 +76,7 @@ export async function modifyRoomInfo(ctx: Context, next: Next) {
   }
   const updatedRoom = await RoomModal.updateRoom(id, {
     roomName,
+    password,
   })
   ctx.body = {
     code: 200,

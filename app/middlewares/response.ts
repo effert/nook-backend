@@ -15,7 +15,7 @@ export default async function responseFormatter(
       ctx.body = response(isSuccess, "", ctx.body)
     }
   } catch (err: any) {
-    // 错误处理
+    // 错误日志记录
     logger.error(err.message)
     ctx.status = err.statusCode || err.status || 500
     ctx.body = response(false, err.message || ctx.__("Internal server error"))

@@ -26,6 +26,7 @@ model User {
 model Room {
   id        String    @id
   roomName  String
+  password  String?
   createdAt DateTime  @default(now())
   members   User[] // 关联到 User 模型
   messages  Message[] // 关联到 Message 模型
