@@ -61,4 +61,59 @@ export default class RoomModal {
     })
     return newRoom
   }
+
+  /**
+   * 把用户加到房间内
+   * @param email
+   * @param roomId
+   * @returns
+   */
+  static async addUserToRoom(email: string, roomId: string) {
+    const updatedRoom = await prisma.room.update({
+      where: { id: roomId },
+      data: {
+        members: {
+          connect: { email },
+        },
+      },
+    })
+
+    return updatedRoom
+  }
+
+  /**
+   * 把用户从房间内移除
+   * @param email
+   * @param roomId
+   * @returns
+   */
+  static async removeUserFromRoom(email: string, roomId: string) {
+    const updatedRoom = await prisma.room.update({
+      where: { id: roomId },
+      data: {
+        members: {
+          disconnect: { email },
+        },
+      },
+    })
+
+    return updatedRoom
+  }
+
+  /**
+   * 获取房间内所有用户
+   * @param roomId
+   * @returns
+   */
+  static async getRoomMembers(roomId: string) {
+    const room = await prisma.room.findUnique({
+      where: {
+        id: roomId,
+      },
+      include: {
+        members: true,
+      },
+    })
+    return room?.members
+  }
 }

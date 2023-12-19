@@ -7,6 +7,7 @@ import RoomModal from "@/models/roomModal"
 import MessageModal from "@/models/messageModal"
 import UserModal from "@/models/userModal"
 import { User } from "@prisma/client"
+import { generateRandomString } from "@/utils"
 
 const server = http.createServer()
 const wss = new WebSocket.Server({ noServer: true })
@@ -19,7 +20,7 @@ type TMessageType = "text" | "image" | "file" | "member" // member 表示成员�
 type TMessage = {
   type: TMessageType
   content: string // type 为 member 时,content 为成员变动的类型(join,leave)
-  sender: User | null // type 为 member 时, sender 为成员名 null说明是匿名用户
+  sender: User // type 为 member 时, sender 为成员
   time: number
   isSelf?: boolean
 }
@@ -35,8 +36,15 @@ const { SECRET_KEY = "" } = process.env
 async function getUser(request: IncomingMessage) {
   const parameters = request.url ? url.parse(request.url, true).query : {}
   const authorization = parameters.authorization
-  if (typeof authorization !== "string" || authorization === "null") {
-    return null
+  if (
+    typeof authorization !== "string" ||
+    authorization === "null" ||
+    authorization === "anonymous"
+  ) {
+    // 创建一个匿名用户返回
+    return await UserModal.createUser(generateRandomString(4), {
+      name: "anonymous",
+    })
   }
   const token = authorization.split(" ")[1]
 
@@ -63,18 +71,16 @@ export default function createWebsocket() {
     const user = await getUser(request)
 
     const roomInfo = await RoomModal.getRoomInfo(roomId)
-    if (!roomInfo) {
-      // 房间不存在就创建房间
-      // await RoomModal.createRoom(roomId)
-      // 房间不存在就拒绝连接
+    rooms[roomId] = rooms[roomId] || new Set()
+    if (!roomInfo || !user || rooms[roomId].size > 1000) {
+      // 房间不存在或人数大于1000就拒绝连接
       ws.close()
       return
     }
-    rooms[roomId] = rooms[roomId] || new Set()
     rooms[roomId].add(ws)
-
-    console.log(`客户端${roomId}已连接:`)
-    // 广播用户进入房间
+    console.log(`房间：${roomId}，用户：${user.name},已连接:`)
+    // 用户进入房间
+    await RoomModal.addUserToRoom(user.email, roomId)
     rooms[roomId].forEach((client) => {
       if (client.readyState === WebSocket.OPEN) {
         const newMessage: TMessage = {
@@ -87,11 +93,15 @@ export default function createWebsocket() {
       }
     })
 
-    ws.on("message", async function incoming(message) {
+    ws.on("message", (message) => handleOnMessage(message, user))
+
+    ws.on("close", (err) => handleClose(user))
+
+    async function handleOnMessage(message: WebSocket.RawData, user: User) {
       if (rooms[roomId]) {
         // xxx: 这里可以做一些消息过滤，比如敏感词过滤
         // 创建消息
-        await MessageModal.createMessage(message.toString(), roomId, user?.id)
+        await MessageModal.createMessage(message.toString(), roomId, user.id)
         // 广播消息
         rooms[roomId].forEach((client) => {
           if (client.readyState === WebSocket.OPEN) {
@@ -106,12 +116,17 @@ export default function createWebsocket() {
           }
         })
       }
-    })
+    }
 
-    ws.on("close", (err) => {
+    function handleClose(user: User) {
       if (rooms[roomId]) {
         rooms[roomId].delete(ws)
-        // 广播用户离开房间
+        // 用户离开房间
+        RoomModal.removeUserFromRoom(user.email, roomId)
+        if (user.name === "anonymous") {
+          // 匿名用户离开时删除
+          UserModal.deleteUser(user.email)
+        }
         rooms[roomId].forEach((client) => {
           if (client.readyState === WebSocket.OPEN) {
             const newMessage: TMessage = {
@@ -130,9 +145,9 @@ export default function createWebsocket() {
           // 删除房间
           // RoomModal.deleteRoom(roomId)
         }
-        console.log(`${roomId}客户端已断开连接`)
+        console.log(`房间：${roomId}，用户：${user?.name},已断开连接`)
       }
-    })
+    }
   })
 
   server.on("upgrade", function upgrade(request, socket, head) {

@@ -32,6 +32,20 @@ export default class UserModal {
   }
 
   /**
+   * 删除用户
+   * @param email
+   * @returns
+   */
+  static async deleteUser(email: string) {
+    const newUser = await prisma.user.delete({
+      where: {
+        email,
+      },
+    })
+    return newUser
+  }
+
+  /**
    * 更新用户信息
    * @param email
    * @param updateData
@@ -53,13 +67,14 @@ export default class UserModal {
    * returns
    */
   static async getUserRooms(email: string) {
-    return prisma.user.findUnique({
+    const userWithRooms = await prisma.user.findUnique({
       where: {
         email,
       },
-      select: {
+      include: {
         rooms: true,
       },
     })
+    return userWithRooms ? userWithRooms.rooms : []
   }
 }
