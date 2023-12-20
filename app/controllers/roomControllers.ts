@@ -34,7 +34,7 @@ export async function createRoom(ctx: Context, next: Next) {
  */
 export async function getRoomInfo(ctx: Context, next: Next) {
   const { id } = ctx.params
-  const { password } = ctx.query
+  const { password } = ctx.query // password 可以是明文或者加密后的密码
   const room = await RoomModal.getRoomInfo(id)
   if (!room) {
     ctx.status = 404
@@ -44,10 +44,9 @@ export async function getRoomInfo(ctx: Context, next: Next) {
   let isPasswordCorrect = false
   if (room.password && password) {
     try {
-      isPasswordCorrect = await bcrypt.compare(
-        password as string,
-        room.password
-      )
+      isPasswordCorrect =
+        password === room.password ||
+        (await bcrypt.compare(password as string, room.password))
     } catch (err) {
       console.log(err)
     }
