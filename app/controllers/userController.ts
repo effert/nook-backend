@@ -97,7 +97,7 @@ async function sendTemporaryPassword(email: string, tempPassword: string) {
     from: EMAIL_HOST_USER,
     to: email,
     subject: "Your Temporary Password",
-    text: `Your temporary password is ${tempPassword}. It will expire in 15 minutes.`,
+    html: `<p>Your temporary password is <span style="color:red;text-decoration-line: underline">${tempPassword}</span>. It will expire in 15 minutes.</p>`,
   }
 
   return await transporter.sendMail(mailOptions)
@@ -130,12 +130,17 @@ export async function generateRandomPassword(ctx: Context, next: Next) {
     tempPassword: hashedPassword,
     tempPasswordExpiry: new Date(Date.now() + 15 * 60 * 1000),
   })
-  // TODO FIXME connect ETIMEDOUT 64.233.188.108:465
-  // let sendResp = await sendTemporaryPassword(user.email, randomPassword)
-  ctx.body = {
-    message: ctx.__("Temporary password generated"),
-    randomPassword,
+  try {
+    await sendTemporaryPassword(user!.email, randomPassword)
+    ctx.body = {
+      message: ctx.__("Temporary password generated"),
+      randomPassword,
+    }
+  } catch (err) {
+    ctx.status = 500
+    ctx.body = { error: ctx.__("Internal server error") }
   }
+
   return next()
 }
 

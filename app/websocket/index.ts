@@ -70,7 +70,7 @@ function getRoomId(request: IncomingMessage) {
 export default function createWebsocket() {
   wss.on("connection", async function connection(ws, request: IncomingMessage) {
     const cookies = cookie.parse(request.headers.cookie || "")
-    const locale = cookies["locale"]
+    const locale = cookies["locale"] || "en"
 
     const roomId: string = getRoomId(request)
     let user: User | null = null
