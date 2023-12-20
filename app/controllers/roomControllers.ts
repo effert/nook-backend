@@ -41,9 +41,16 @@ export async function getRoomInfo(ctx: Context, next: Next) {
     ctx.body = { error: ctx.__("Room not found") }
     return next()
   }
-  let isPasswordCorrect = true
-  if (room.password) {
-    isPasswordCorrect = await bcrypt.compare(password as string, room.password)
+  let isPasswordCorrect = false
+  if (room.password && password) {
+    try {
+      isPasswordCorrect = await bcrypt.compare(
+        password as string,
+        room.password
+      )
+    } catch (err) {
+      console.log(err)
+    }
   }
   const data = {
     ...room,
@@ -76,7 +83,7 @@ export async function modifyRoomInfo(ctx: Context, next: Next) {
   }
   const updatedRoom = await RoomModal.updateRoom(id, {
     roomName,
-    password,
+    password: password && (await bcrypt.hash(password, 10)),
   })
   ctx.body = {
     code: 200,

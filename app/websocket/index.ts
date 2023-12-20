@@ -8,6 +8,8 @@ import MessageModal from "@/models/messageModal"
 import UserModal from "@/models/userModal"
 import { User } from "@prisma/client"
 import { generateRandomString } from "@/utils"
+import cookie from "cookie"
+import websocketLocales from "@/locales/websocketLocales"
 
 const server = http.createServer()
 const wss = new WebSocket.Server({ noServer: true })
@@ -16,7 +18,7 @@ const PORT = process.env.SOCKET_PORT || 8080
 interface Room {
   [roomId: string]: Set<WebSocket>
 }
-type TMessageType = "text" | "image" | "file" | "member" // member 表示成员变动
+type TMessageType = "text" | "image" | "file" | "member" | "error" // member 表示成员变动
 type TMessage = {
   type: TMessageType
   content: string // type 为 member 时,content 为成员变动的类型(join,leave)
@@ -33,7 +35,7 @@ const { SECRET_KEY = "" } = process.env
  * @returns
  * @description
  */
-async function getUser(request: IncomingMessage) {
+async function getUser(request: IncomingMessage, locale: string) {
   const parameters = request.url ? url.parse(request.url, true).query : {}
   const authorization = parameters.authorization
   if (
@@ -43,7 +45,7 @@ async function getUser(request: IncomingMessage) {
   ) {
     // 创建一个匿名用户返回
     return await UserModal.createUser(generateRandomString(4), {
-      name: "anonymous",
+      name: websocketLocales[locale]["anonymous"],
     })
   }
   const token = authorization.split(" ")[1]
@@ -67,13 +69,46 @@ function getRoomId(request: IncomingMessage) {
 
 export default function createWebsocket() {
   wss.on("connection", async function connection(ws, request: IncomingMessage) {
+    const cookies = cookie.parse(request.headers.cookie || "")
+    const locale = cookies["locale"]
+
     const roomId: string = getRoomId(request)
-    const user = await getUser(request)
+    let user: User | null = null
+    try {
+      user = await getUser(request, locale)
+    } catch (err) {}
 
     const roomInfo = await RoomModal.getRoomInfo(roomId)
     rooms[roomId] = rooms[roomId] || new Set()
     if (!roomInfo || !user || rooms[roomId].size > 1000) {
-      // 房间不存在或人数大于1000就拒绝连接
+      if (!roomInfo) {
+        ws.send(
+          JSON.stringify({
+            type: "error",
+            content: websocketLocales[locale]["The room does not exist"],
+            time: Date.now(),
+          })
+        )
+      } else if (!user) {
+        ws.send(
+          JSON.stringify({
+            type: "error",
+            content: websocketLocales[locale]["Login expiration"],
+            time: Date.now(),
+          })
+        )
+      } else if (rooms[roomId].size > 1000) {
+        ws.send(
+          JSON.stringify({
+            type: "error",
+            content:
+              websocketLocales[locale][
+                "The maximum number of people is exceeded"
+              ],
+            time: Date.now(),
+          })
+        )
+      }
       ws.close()
       return
     }
@@ -86,16 +121,16 @@ export default function createWebsocket() {
         const newMessage: TMessage = {
           type: "member",
           content: "join",
-          sender: user,
+          sender: user!,
           time: Date.now(),
         }
         client.send(JSON.stringify(newMessage))
       }
     })
 
-    ws.on("message", (message) => handleOnMessage(message, user))
+    ws.on("message", (message) => handleOnMessage(message, user!))
 
-    ws.on("close", (err) => handleClose(user))
+    ws.on("close", (err) => handleClose(user!))
 
     async function handleOnMessage(message: WebSocket.RawData, user: User) {
       if (rooms[roomId]) {
