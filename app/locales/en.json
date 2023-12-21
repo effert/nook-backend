@@ -12,5 +12,7 @@
   "Temporary password generated": "Temporary password generated",
   "Access denied": "Access denied",
   "Authentication required": "Authentication required",
-  "Room not found": "Room not found"
+  "Room not found": "Room not found",
+  "Your temporary password is": "Your temporary password is",
+  "It will expire in 15 minutes": "It will expire in 15 minutes"
 }

@@ -84,7 +84,11 @@ export async function login(ctx: Context, next: Next) {
  * @param email
  * @param tempPassword
  */
-async function sendTemporaryPassword(email: string, tempPassword: string) {
+async function sendTemporaryPassword(
+  ctx: Context,
+  email: string,
+  tempPassword: string
+) {
   let transporter = nodemailer.createTransport({
     service: "gmail",
     auth: {
@@ -97,7 +101,11 @@ async function sendTemporaryPassword(email: string, tempPassword: string) {
     from: EMAIL_HOST_USER,
     to: email,
     subject: "Your Temporary Password",
-    html: `<p>Your temporary password is <span style="color:red;text-decoration-line: underline">${tempPassword}</span>. It will expire in 15 minutes.</p>`,
+    html: `<p>${ctx.__(
+      "Your temporary password is"
+    )} <span style="color:red;text-decoration-line: underline">${tempPassword}</span>. ${ctx.__(
+      "It will expire in 15 minutes"
+    )}.</p>`,
   }
 
   return await transporter.sendMail(mailOptions)
@@ -131,7 +139,7 @@ export async function generateRandomPassword(ctx: Context, next: Next) {
     tempPasswordExpiry: new Date(Date.now() + 15 * 60 * 1000),
   })
   try {
-    await sendTemporaryPassword(user!.email, randomPassword)
+    await sendTemporaryPassword(ctx, user!.email, randomPassword)
     ctx.body = {
       message: ctx.__("Temporary password generated"),
       randomPassword,

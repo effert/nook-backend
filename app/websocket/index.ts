@@ -176,9 +176,9 @@ export default function createWebsocket() {
         if (rooms[roomId].size === 0) {
           delete rooms[roomId]
           // 删除房间内所有消息
-          // MessageModal.deleteRoomMessage(roomId)
+          MessageModal.deleteRoomMessage(roomId)
           // 删除房间
-          // RoomModal.deleteRoom(roomId)
+          RoomModal.deleteRoom(roomId)
         }
         console.log(`房间：${roomId}，用户：${user?.name},已断开连接`)
       }

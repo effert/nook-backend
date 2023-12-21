@@ -12,5 +12,7 @@
   "Temporary password generated": "生成临时密码",
   "Access denied": "拒绝访问",
   "Authentication required": "认证要求",
-  "Room not found": "未找到房间"
+  "Room not found": "未找到房间",
+  "Your temporary password is": "您的临时密码是",
+  "It will expire in 15 minutes": "它将在15分钟内过期"
 }
