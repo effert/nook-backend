@@ -14,5 +14,7 @@
   "Authentication required": "认证要求",
   "Room not found": "未找到房间",
   "Your temporary password is": "您的临时密码是",
-  "It will expire in 15 minutes": "它将在15分钟内过期"
+  "It will expire in 15 minutes": "它将在15分钟内过期",
+  "File size cannot exceed 2MB": "文件大小不能超过2MB",
+  "Only images are allowed": "只允许图片"
 }

@@ -63,7 +63,7 @@
     if (fileInput.files.length > 0) {
       formData.append('file', fileInput.files[0]);
 
-      fetch('http://localhost:8000/message/import?roomId=a6f178071408076a', {
+      fetch('http://localhost:8000/user/avatar', {
         method: 'POST',
         body: formData
       })

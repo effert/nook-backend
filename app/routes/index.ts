@@ -5,7 +5,10 @@ import {
   login,
   generateRandomPassword,
   getRooms,
+  uploadAvatar,
 } from "@/controllers/userController"
+import koaBody from "koa-body"
+import path from "path"
 
 const router = new Router()
 
@@ -32,5 +35,22 @@ router.get("/user-info", authMiddleware, getUserInfo)
  * @returns
  */
 router.get("/user/rooms", authMiddleware, getRooms)
+
+/**
+ * 上传用户头像
+ * @param avatar 用户头像
+ * @returns
+ */
+router.post(
+  "/user/avatar",
+  koaBody({
+    multipart: true,
+    formidable: {
+      keepExtensions: true, // 保持文件扩展名
+    },
+  }),
+  authMiddleware,
+  uploadAvatar
+)
 
 export default router
