@@ -18,6 +18,9 @@ const PORT = process.env.SOCKET_PORT || 8080
 interface Room {
   [roomId: string]: Set<WebSocket>
 }
+interface RoomAi {
+  [roomId: string]: string
+}
 type TMessageType = "text" | "image" | "file" | "member" | "error" // member 表示成员变动
 type TMessage = {
   type: TMessageType
@@ -27,8 +30,10 @@ type TMessage = {
   isSelf?: boolean
 }
 
-let rooms: Room = {}
+const rooms: Room = {}
+const roomAi: RoomAi = {}
 const { SECRET_KEY = "" } = process.env
+const CHANGE_NAME_KEY = "changeAiName"
 /**
  * 获取用户信息
  * @param request
@@ -80,6 +85,7 @@ export default function createWebsocket() {
 
     const roomInfo = await RoomModal.getRoomInfo(roomId)
     rooms[roomId] = rooms[roomId] || new Set()
+    roomAi[roomId] = roomAi[roomId] || "ai" // 默认叫做ai
     if (!roomInfo || !user || rooms[roomId].size > 1000) {
       if (!roomInfo) {
         ws.send(
@@ -136,13 +142,14 @@ export default function createWebsocket() {
       if (rooms[roomId]) {
         // xxx: 这里可以做一些消息过滤，比如敏感词过滤
         // 创建消息
-        await MessageModal.createMessage(message.toString(), roomId, user.id)
+        const messageText = message.toString()
+        await MessageModal.createMessage(messageText, roomId, user.id)
         // 广播消息
         rooms[roomId].forEach((client) => {
           if (client.readyState === WebSocket.OPEN) {
             const newMessage: TMessage = {
               type: "text",
-              content: message.toString(),
+              content: messageText,
               sender: user,
               isSelf: client === ws,
               time: Date.now(),
@@ -150,10 +157,43 @@ export default function createWebsocket() {
             client.send(JSON.stringify(newMessage))
           }
         })
+
+        // 修改本房间ai的名字
+        if (messageText.includes(CHANGE_NAME_KEY)) {
+          const name = messageText.split(" ")[1]
+          if (name) {
+            roomAi[roomId] = name
+          }
+        }
+        // 处理ai相关逻辑
+        if (messageText.indexOf(`@${roomAi[roomId]}`) > -1) {
+          // ai 机器人
+          const aiMessage: TMessage = {
+            type: "text",
+            content: "hello",
+            sender: {
+              id: 0,
+              email: "",
+              password: null,
+              tempPassword: null,
+              tempPasswordExpiry: null,
+              name: roomAi[roomId],
+              avatar: "",
+            },
+            time: Date.now(),
+          }
+          rooms[roomId].forEach((client) => {
+            client.send(JSON.stringify(aiMessage))
+          })
+        }
       }
     }
 
     function handleClose(user: User) {
+      if (roomAi[roomId]) {
+        delete roomAi[roomId]
+      }
+
       if (rooms[roomId]) {
         rooms[roomId].delete(ws)
         // 用户离开房间
