@@ -1,18 +1,23 @@
 import OpenAI from "openai"
-import http from "http"
 import { HttpsProxyAgent } from "https-proxy-agent"
 
 const openai = new OpenAI({
-  apiKey: "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",
-  httpAgent: new HttpsProxyAgent("http://localhost:7890"),
+  apiKey: process.env.OPENAI_API_KEY,
+  httpAgent: new HttpsProxyAgent(process.env.PROXY_URL!),
 })
 
-async function main() {
-  const chatCompletion = await openai.chat.completions.create({
-    messages: [{ role: "user", content: "Say this is a test" }],
-    model: "gpt-4",
+export default async function main(content) {
+  const stream = await openai.beta.chat.completions.stream({
+    model: "gpt-3.5-turbo-0613",
+    // model: "gpt-4-1106-preview",
+    messages: [{ role: "user", content }],
+    stream: true,
   })
-  console.log(chatCompletion.choices[0].message) // {id: "…", choices: […], …}
-}
 
-main()
+  // for await (const chunk of stream) {
+  //   console.log(chunk.choices[0].delta.content);
+  // }
+
+  const chatCompletion = await stream.finalChatCompletion()
+  return chatCompletion.choices[0].message.content
+}

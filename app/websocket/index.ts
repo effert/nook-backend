@@ -10,6 +10,7 @@ import { User } from "@prisma/client"
 import { generateRandomString } from "@/utils"
 import cookie from "cookie"
 import websocketLocales from "@/locales/websocketLocales"
+import openAi from "@/openai"
 
 const server = http.createServer()
 const wss = new WebSocket.Server({ noServer: true })
@@ -167,10 +168,17 @@ export default function createWebsocket() {
         }
         // 处理ai相关逻辑
         if (messageText.indexOf(`@${roomAi[roomId]}`) > -1) {
+          const question = messageText.replace(`@${roomAi[roomId]}`, "").trim()
           // ai 机器人
+          let resp = "?"
+          if (!!question) {
+            resp =
+              (await openAi(question)) ||
+              websocketLocales[locale]["Sorry I don't know how to response"]
+          }
           const aiMessage: TMessage = {
             type: "text",
-            content: "hello",
+            content: resp,
             sender: {
               id: 0,
               email: "",
@@ -178,7 +186,7 @@ export default function createWebsocket() {
               tempPassword: null,
               tempPasswordExpiry: null,
               name: roomAi[roomId],
-              avatar: "",
+              avatar: "/uploads/gpt-logo.jpg",
             },
             time: Date.now(),
           }
