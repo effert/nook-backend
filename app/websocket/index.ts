@@ -11,6 +11,7 @@ import { generateRandomString } from "@/utils"
 import cookie from "cookie"
 import websocketLocales from "@/locales/websocketLocales"
 import openAi from "@/openai"
+import logger from "@/utils/log"
 
 const server = http.createServer()
 const wss = new WebSocket.Server({ noServer: true })
@@ -86,7 +87,6 @@ export default function createWebsocket() {
 
     const roomInfo = await RoomModal.getRoomInfo(roomId)
     rooms[roomId] = rooms[roomId] || new Set()
-    roomAi[roomId] = roomAi[roomId] || "ai" // 默认叫做ai
     if (!roomInfo || !user || rooms[roomId].size > 1000) {
       if (!roomInfo) {
         ws.send(
@@ -119,10 +119,15 @@ export default function createWebsocket() {
       ws.close()
       return
     }
+    roomAi[roomId] = roomAi[roomId] || "ai" // 默认叫做ai
     rooms[roomId].add(ws)
     console.log(`房间：${roomId}，用户：${user.name},已连接:`)
     // 用户进入房间
-    await RoomModal.addUserToRoom(user.email, roomId)
+    try {
+      await RoomModal.addUserToRoom(user.email, roomId)
+    } catch (err: any) {
+      logger.error(err.message)
+    }
     rooms[roomId].forEach((client) => {
       if (client.readyState === WebSocket.OPEN) {
         const newMessage: TMessage = {
@@ -144,7 +149,11 @@ export default function createWebsocket() {
         // xxx: 这里可以做一些消息过滤，比如敏感词过滤
         // 创建消息
         const messageText = message.toString()
-        await MessageModal.createMessage(messageText, roomId, user.id)
+        try {
+          await MessageModal.createMessage(messageText, roomId, user.id)
+        } catch (err: any) {
+          logger.error(err.message)
+        }
         // 广播消息
         rooms[roomId].forEach((client) => {
           if (client.readyState === WebSocket.OPEN) {
@@ -205,10 +214,18 @@ export default function createWebsocket() {
       if (rooms[roomId]) {
         rooms[roomId].delete(ws)
         // 用户离开房间
-        RoomModal.removeUserFromRoom(user.email, roomId)
+        try {
+          RoomModal.removeUserFromRoom(user.email, roomId)
+        } catch (err: any) {
+          logger.error(err.message)
+        }
         if (user.name === "anonymous") {
           // 匿名用户离开时删除
-          UserModal.deleteUser(user.email)
+          try {
+            UserModal.deleteUser(user.email)
+          } catch (err: any) {
+            logger.error(err.message)
+          }
         }
         rooms[roomId].forEach((client) => {
           if (client.readyState === WebSocket.OPEN) {
@@ -223,10 +240,14 @@ export default function createWebsocket() {
         })
         if (rooms[roomId].size === 0) {
           delete rooms[roomId]
-          // 删除房间内所有消息
-          MessageModal.deleteRoomMessage(roomId)
-          // 删除房间
-          RoomModal.deleteRoom(roomId)
+          try {
+            // 删除房间内所有消息
+            MessageModal.deleteRoomMessage(roomId)
+            // 删除房间
+            RoomModal.deleteRoom(roomId)
+          } catch (err: any) {
+            logger.error(err.message)
+          }
         }
         console.log(`房间：${roomId}，用户：${user?.name},已断开连接`)
       }
