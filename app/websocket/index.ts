@@ -145,6 +145,19 @@ export default function createWebsocket() {
     ws.on("close", (err) => handleClose(user!))
 
     async function handleOnMessage(message: WebSocket.RawData, user: User) {
+      const roomInfo = await RoomModal.getRoomInfo(roomId)
+      if (!roomInfo) {
+        ws.send(
+          JSON.stringify({
+            type: "error",
+            content: websocketLocales[locale]["The room does not exist"],
+            time: Date.now(),
+          })
+        )
+        ws.close()
+        return
+      }
+
       if (rooms[roomId]) {
         // xxx: 这里可以做一些消息过滤，比如敏感词过滤
         // 创建消息
@@ -185,6 +198,8 @@ export default function createWebsocket() {
               (await openAi(question)) ||
               websocketLocales[locale]["Sorry I don't know how to response"]
           }
+          // 记录ai的消息
+          await MessageModal.createMessage(resp, roomId, user.id)
           const aiMessage: TMessage = {
             type: "text",
             content: resp,
@@ -206,7 +221,20 @@ export default function createWebsocket() {
       }
     }
 
-    function handleClose(user: User) {
+    async function handleClose(user: User) {
+      const roomInfo = await RoomModal.getRoomInfo(roomId)
+      if (!roomInfo) {
+        ws.send(
+          JSON.stringify({
+            type: "error",
+            content: websocketLocales[locale]["The room does not exist"],
+            time: Date.now(),
+          })
+        )
+        ws.close()
+        return
+      }
+
       if (roomAi[roomId]) {
         delete roomAi[roomId]
       }
@@ -215,14 +243,14 @@ export default function createWebsocket() {
         rooms[roomId].delete(ws)
         // 用户离开房间
         try {
-          RoomModal.removeUserFromRoom(user.email, roomId)
+          await RoomModal.removeUserFromRoom(user.email, roomId)
         } catch (err: any) {
           logger.error(err.message)
         }
         if (user.name === "anonymous") {
           // 匿名用户离开时删除
           try {
-            UserModal.deleteUser(user.email)
+            await UserModal.deleteUser(user.email)
           } catch (err: any) {
             logger.error(err.message)
           }
@@ -238,13 +266,14 @@ export default function createWebsocket() {
             client.send(JSON.stringify(newMessage))
           }
         })
+        console.log(212, roomId, rooms[roomId].size)
         if (rooms[roomId].size === 0) {
           delete rooms[roomId]
           try {
             // 删除房间内所有消息
-            MessageModal.deleteRoomMessage(roomId)
+            await MessageModal.deleteRoomMessage(roomId)
             // 删除房间
-            RoomModal.deleteRoom(roomId)
+            await RoomModal.deleteRoom(roomId)
           } catch (err: any) {
             logger.error(err.message)
           }
