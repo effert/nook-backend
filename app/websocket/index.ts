@@ -161,7 +161,8 @@ export default function createWebsocket() {
       if (rooms[roomId]) {
         // xxx: 这里可以做一些消息过滤，比如敏感词过滤
         // 创建消息
-        const messageText = message.toString()
+        const messageObj = JSON.parse(message.toString())
+        const { content: messageText, type } = messageObj
         try {
           await MessageModal.createMessage(messageText, roomId, user.id)
         } catch (err: any) {
@@ -171,7 +172,7 @@ export default function createWebsocket() {
         rooms[roomId].forEach((client) => {
           if (client.readyState === WebSocket.OPEN) {
             const newMessage: TMessage = {
-              type: "text",
+              type,
               content: messageText,
               sender: user,
               isSelf: client === ws,

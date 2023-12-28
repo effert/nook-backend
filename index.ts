@@ -13,6 +13,7 @@ import locales from "koa-locales"
 import userRouter from "@/routes/index"
 import roomRouter from "@/routes/room"
 import messageRouter from "@/routes/message"
+import commonRouter from "@/routes/common"
 
 const app = new Koa()
 
@@ -33,6 +34,7 @@ app.use(responseFormatter)
 app.use(userRouter.routes()).use(userRouter.allowedMethods())
 app.use(roomRouter.routes()).use(roomRouter.allowedMethods())
 app.use(messageRouter.routes()).use(messageRouter.allowedMethods())
+app.use(commonRouter.routes()).use(commonRouter.allowedMethods())
 
 createWebsocket()
 const PORT = process.env.PORT || 8000

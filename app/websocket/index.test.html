@@ -63,7 +63,7 @@
     if (fileInput.files.length > 0) {
       formData.append('file', fileInput.files[0]);
 
-      fetch('http://localhost:8000/user/avatar', {
+      fetch('http://localhost:8000/common/upload', {
         method: 'POST',
         body: formData
       })
