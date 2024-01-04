@@ -267,8 +267,9 @@ export default function createWebsocket() {
             client.send(JSON.stringify(newMessage))
           }
         })
-        console.log(212, roomId, rooms[roomId].size)
-        if (rooms[roomId].size === 0) {
+        // 房间剩余人数为 0 时，删除房间
+        let restMembers = await RoomModal.getRoomMembers(roomId)
+        if (restMembers?.length === 0) {
           delete rooms[roomId]
           try {
             // 删除房间内所有消息
