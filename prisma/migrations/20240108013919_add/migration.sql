@@ -1,0 +1,2 @@
+-- AlterTable
+ALTER TABLE `Room` ADD COLUMN `ai` BOOLEAN NOT NULL DEFAULT false;

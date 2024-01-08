@@ -33,9 +33,7 @@ type TMessage = {
 }
 
 const rooms: Room = {}
-const roomAi: RoomAi = {}
 const { SECRET_KEY = "" } = process.env
-const CHANGE_NAME_KEY = "changeAiName"
 /**
  * 获取用户信息
  * @param request
@@ -119,7 +117,6 @@ export default function createWebsocket() {
       ws.close()
       return
     }
-    roomAi[roomId] = roomAi[roomId] || "ai" // 默认叫做ai
     rooms[roomId].add(ws)
     console.log(`房间：${roomId}，用户：${user.name},已连接:`)
     // 用户进入房间
@@ -182,16 +179,10 @@ export default function createWebsocket() {
           }
         })
 
-        // 修改本房间ai的名字
-        if (messageText.includes(CHANGE_NAME_KEY)) {
-          const name = messageText.split(" ")[1]
-          if (name) {
-            roomAi[roomId] = name
-          }
-        }
         // 处理ai相关逻辑
-        if (messageText.indexOf(`@${roomAi[roomId]}`) > -1) {
-          const question = messageText.replace(`@${roomAi[roomId]}`, "").trim()
+        const aiName = roomInfo?.aiName || "AI" // 默认叫AI
+        if (roomInfo.ai && messageText.indexOf(`@${aiName}`) > -1) {
+          const question = messageText.replace(`@${aiName}`, "").trim()
           // ai 机器人
           let resp = "?"
           if (!!question) {
@@ -210,7 +201,7 @@ export default function createWebsocket() {
               password: null,
               tempPassword: null,
               tempPasswordExpiry: null,
-              name: roomAi[roomId],
+              name: aiName,
               avatar: "/uploads/gpt-logo.jpg",
             },
             time: Date.now(),
@@ -234,10 +225,6 @@ export default function createWebsocket() {
         )
         ws.close()
         return
-      }
-
-      if (roomAi[roomId]) {
-        delete roomAi[roomId]
       }
 
       if (rooms[roomId]) {

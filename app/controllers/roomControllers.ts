@@ -67,11 +67,9 @@ export async function getRoomInfo(ctx: Context, next: Next) {
  * @param ctx
  * @returns
  */
-
 export async function modifyRoomInfo(ctx: Context, next: Next) {
   const { id } = ctx.params
-  const { roomName, password } = ctx.request.body as {
-    roomName: string
+  const { password, ...rest } = ctx.request.body as {
     password: string
   }
   const room = await RoomModal.getRoomInfo(id)
@@ -81,8 +79,8 @@ export async function modifyRoomInfo(ctx: Context, next: Next) {
     return next()
   }
   const updatedRoom = await RoomModal.updateRoom(id, {
-    roomName,
     password: password && (await bcrypt.hash(password, 10)),
+    ...rest,
   })
   ctx.body = {
     code: 200,
@@ -107,6 +105,45 @@ export async function getRoomMembers(ctx: Context, next: Next) {
       name: member.name,
       avatar: member.avatar,
     })),
+  }
+  return next()
+}
+
+/**
+ * 获取房间ai的权限
+ * @param ctx
+ * @returns boolean
+ */
+export async function getRoomAi(ctx: Context, next: Next) {
+  const { id } = ctx.params
+  const room = await RoomModal.getRoomInfo(id)
+  ctx.body = {
+    code: 200,
+    data: room?.ai,
+  }
+  return next()
+}
+
+/**
+ * 设置房间ai的权限
+ * @param ctx
+ * @returns boolean
+ */
+export async function setRoomAi(ctx: Context, next: Next) {
+  const { id } = ctx.params
+  const { ai } = ctx.request.body as { ai: boolean }
+  const room = await RoomModal.getRoomInfo(id)
+  if (!room) {
+    ctx.status = 404
+    ctx.body = { error: ctx.__("Room not found") }
+    return next()
+  }
+  const updatedRoom = await RoomModal.updateRoom(id, {
+    ai,
+  })
+  ctx.body = {
+    code: 200,
+    data: updatedRoom,
   }
   return next()
 }

@@ -4,6 +4,8 @@ import {
   getRoomInfo,
   modifyRoomInfo,
   getRoomMembers,
+  getRoomAi,
+  setRoomAi,
 } from "@/controllers/roomControllers"
 
 const router = new Router({
@@ -33,5 +35,17 @@ router.put("/:id", modifyRoomInfo)
  * @returns
  */
 router.get("/:id/users", getRoomMembers)
+
+/**
+ * 获取房间ai的权限
+ * @returns
+ */
+router.get("/:id/ai", getRoomAi)
+
+/**
+ * 设置房间ai的权限
+ * @returns boolean
+ */
+router.put("/:id/ai", setRoomAi)
 
 export default router

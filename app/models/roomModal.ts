@@ -116,4 +116,36 @@ export default class RoomModal {
     })
     return room?.members
   }
+
+  /**
+   * 获取房间ai的权限
+   * @param roomId
+   * @returns
+   */
+  static async getRoomAi(roomId: string) {
+    const room = await prisma.room.findUnique({
+      where: {
+        id: roomId,
+      },
+    })
+    return room?.ai
+  }
+
+  /**
+   * 设置房间ai的权限
+   * @param roomId 房间id
+   * @param ai ai的权限 false:无权限 true:有权限
+   * @returns
+   */
+  static async setRoomAi(roomId: string, ai: boolean) {
+    const room = await prisma.room.update({
+      where: {
+        id: roomId,
+      },
+      data: {
+        ai,
+      },
+    })
+    return room
+  }
 }
