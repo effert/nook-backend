@@ -23,9 +23,17 @@ interface Room {
 interface RoomAi {
   [roomId: string]: string
 }
-type TMessageType = "text" | "image" | "file" | "member" | "error" // member 表示成员变动
+// member 表示成员变动 update表示房间信息变动
+enum MessageType {
+  TEXT = "text",
+  IMAGE = "image",
+  FILE = "file",
+  MEMBER = "member",
+  ERROR = "error",
+  UPDATE = "update",
+}
 type TMessage = {
-  type: TMessageType
+  type: MessageType
   content: string // type 为 member 时,content 为成员变动的类型(join,leave)
   sender: User // type 为 member 时, sender 为成员
   time: number
@@ -89,7 +97,7 @@ export default function createWebsocket() {
       if (!roomInfo) {
         ws.send(
           JSON.stringify({
-            type: "error",
+            type: MessageType.ERROR,
             content: websocketLocales[locale]["The room does not exist"],
             time: Date.now(),
           })
@@ -97,7 +105,7 @@ export default function createWebsocket() {
       } else if (!user) {
         ws.send(
           JSON.stringify({
-            type: "error",
+            type: MessageType.ERROR,
             content: websocketLocales[locale]["Login expiration"],
             time: Date.now(),
           })
@@ -105,7 +113,7 @@ export default function createWebsocket() {
       } else if (rooms[roomId].size > 1000) {
         ws.send(
           JSON.stringify({
-            type: "error",
+            type: MessageType.ERROR,
             content:
               websocketLocales[locale][
                 "The maximum number of people is exceeded"
@@ -128,7 +136,7 @@ export default function createWebsocket() {
     rooms[roomId].forEach((client) => {
       if (client.readyState === WebSocket.OPEN) {
         const newMessage: TMessage = {
-          type: "member",
+          type: MessageType.MEMBER,
           content: "join",
           sender: user!,
           time: Date.now(),
@@ -146,7 +154,7 @@ export default function createWebsocket() {
       if (!roomInfo) {
         ws.send(
           JSON.stringify({
-            type: "error",
+            type: MessageType.ERROR,
             content: websocketLocales[locale]["The room does not exist"],
             time: Date.now(),
           })
@@ -160,6 +168,21 @@ export default function createWebsocket() {
         // 创建消息
         const messageObj = JSON.parse(message.toString())
         const { content: messageText, type } = messageObj
+
+        if (type === MessageType.UPDATE) {
+          rooms[roomId].forEach((client) => {
+            if (client.readyState === WebSocket.OPEN) {
+              client.send(
+                JSON.stringify({
+                  type: MessageType.UPDATE,
+                  time: Date.now(),
+                })
+              )
+            }
+          })
+          return
+        }
+
         try {
           await MessageModal.createMessage(messageText, roomId, user.id)
         } catch (err: any) {
@@ -193,7 +216,7 @@ export default function createWebsocket() {
           // 记录ai的消息
           await MessageModal.createMessage(resp, roomId, user.id)
           const aiMessage: TMessage = {
-            type: "text",
+            type: MessageType.TEXT,
             content: resp,
             sender: {
               id: 0,
@@ -218,7 +241,7 @@ export default function createWebsocket() {
       if (!roomInfo) {
         ws.send(
           JSON.stringify({
-            type: "error",
+            type: MessageType.ERROR,
             content: websocketLocales[locale]["The room does not exist"],
             time: Date.now(),
           })
@@ -246,7 +269,7 @@ export default function createWebsocket() {
         rooms[roomId].forEach((client) => {
           if (client.readyState === WebSocket.OPEN) {
             const newMessage: TMessage = {
-              type: "member",
+              type: MessageType.MEMBER,
               content: "leave",
               sender: user,
               time: Date.now(),
