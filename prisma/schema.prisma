@@ -29,7 +29,7 @@ model Room {
   password  String?
   aiEnabled Boolean   @default(false)
   ai        Boolean   @default(false)
-  aiName    String?
+  aiName    String?   @default("AI")
   createdAt DateTime  @default(now())
   members   User[] // 关联到 User 模型
   messages  Message[] // 关联到 Message 模型

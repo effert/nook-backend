@@ -204,7 +204,7 @@ export default function createWebsocket() {
         })
 
         // 处理ai相关逻辑
-        const aiName = roomInfo?.aiName || "AI" // 默认叫AI
+        const aiName = roomInfo?.aiName
         if (roomInfo.ai && messageText.indexOf(`@${aiName}`) > -1) {
           const question = messageText.replace(`@${aiName}`, "").trim()
           // ai 机器人

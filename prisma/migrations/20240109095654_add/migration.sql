@@ -1,0 +1,2 @@
+-- AlterTable
+ALTER TABLE `Room` MODIFY `aiName` VARCHAR(191) NULL DEFAULT 'AI';
