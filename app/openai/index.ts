@@ -8,7 +8,8 @@ const openai = new OpenAI({
 
 export default async function main(content) {
   const stream = await openai.beta.chat.completions.stream({
-    model: "gpt-3.5-turbo-0613",
+    model: "gpt-3.5-turbo",
+    // model: "gpt-3.5-turbo-1106",
     // model: "gpt-4-1106-preview",
     messages: [{ role: "user", content }],
     stream: true,

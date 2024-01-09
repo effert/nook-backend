@@ -169,9 +169,10 @@ export default function createWebsocket() {
         const messageObj = JSON.parse(message.toString())
         const { content: messageText, type } = messageObj
 
+        // 通知房间内所有人更新房间消息
         if (type === MessageType.UPDATE) {
           rooms[roomId].forEach((client) => {
-            if (client.readyState === WebSocket.OPEN) {
+            if (client.readyState === WebSocket.OPEN && client !== ws) {
               client.send(
                 JSON.stringify({
                   type: MessageType.UPDATE,

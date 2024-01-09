@@ -2,6 +2,8 @@ import { Context, Next } from "koa"
 import RoomModal from "@/models/roomModal"
 import { generateRandomString } from "@/utils"
 import bcrypt from "bcrypt"
+import { omit } from "lodash"
+import { Room } from "@prisma/client"
 
 /**
  * 新增一个房间
@@ -69,18 +71,18 @@ export async function getRoomInfo(ctx: Context, next: Next) {
  */
 export async function modifyRoomInfo(ctx: Context, next: Next) {
   const { id } = ctx.params
-  const { password, ...rest } = ctx.request.body as {
-    password: string
-  }
+  const { password, ...rest } = ctx.request.body as Partial<Room>
   const room = await RoomModal.getRoomInfo(id)
   if (!room) {
     ctx.status = 404
     ctx.body = { error: ctx.__("Room not found") }
     return next()
   }
+
   const updatedRoom = await RoomModal.updateRoom(id, {
     password: password && (await bcrypt.hash(password, 10)),
-    ...rest,
+    // 这个方法不允许修改ai权限
+    ...omit(rest, ["ai", "aiEnabled"]),
   })
   ctx.body = {
     code: 200,
@@ -136,6 +138,11 @@ export async function setRoomAi(ctx: Context, next: Next) {
   if (!room) {
     ctx.status = 404
     ctx.body = { error: ctx.__("Room not found") }
+    return next()
+  }
+  if (!room.aiEnabled) {
+    ctx.status = 403
+    ctx.body = { error: ctx.__("AI is not enabled") }
     return next()
   }
   const updatedRoom = await RoomModal.updateRoom(id, {

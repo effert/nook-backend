@@ -27,6 +27,7 @@ model Room {
   id        String    @id
   roomName  String
   password  String?
+  aiEnabled Boolean   @default(false)
   ai        Boolean   @default(false)
   aiName    String?
   createdAt DateTime  @default(now())
