@@ -205,7 +205,11 @@ export default function createWebsocket() {
 
         // 处理ai相关逻辑
         const aiName = roomInfo?.aiName
-        if (roomInfo.ai && messageText.indexOf(`@${aiName}`) > -1) {
+        if (
+          roomInfo.ai &&
+          roomInfo.aiEnabled &&
+          messageText.indexOf(`@${aiName}`) > -1
+        ) {
           const question = messageText.replace(`@${aiName}`, "").trim()
           // ai 机器人
           let resp = "?"
