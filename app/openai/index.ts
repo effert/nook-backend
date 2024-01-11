@@ -3,7 +3,7 @@ import { HttpsProxyAgent } from "https-proxy-agent"
 
 const openai = new OpenAI({
   apiKey: process.env.OPENAI_API_KEY,
-  httpAgent: new HttpsProxyAgent(process.env.PROXY_URL!),
+  // httpAgent: new HttpsProxyAgent(process.env.PROXY_URL!),
 })
 
 export default async function main(content) {
