@@ -12,7 +12,7 @@
     "start": "node dist/index.js"
   },
   "_moduleAliases": {
-    "@": "app"
+    "@": "dist/app"
   },
   "devDependencies": {
     "@types/bcrypt": "^5.0.2",

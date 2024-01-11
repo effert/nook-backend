@@ -20,9 +20,6 @@ const PORT = process.env.SOCKET_PORT || 8080
 interface Room {
   [roomId: string]: Set<WebSocket>
 }
-interface RoomAi {
-  [roomId: string]: string
-}
 // member 表示成员变动 update表示房间信息变动
 enum MessageType {
   TEXT = "text",
