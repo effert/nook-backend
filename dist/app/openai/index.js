@@ -13,10 +13,9 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 const openai_1 = __importDefault(require("openai"));
-const https_proxy_agent_1 = require("https-proxy-agent");
 const openai = new openai_1.default({
     apiKey: process.env.OPENAI_API_KEY,
-    httpAgent: new https_proxy_agent_1.HttpsProxyAgent(process.env.PROXY_URL),
+    // httpAgent: new HttpsProxyAgent(process.env.PROXY_URL!),
 });
 function main(content) {
     return __awaiter(this, void 0, void 0, function* () {
