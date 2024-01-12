@@ -15,6 +15,10 @@ const router = new koa_router_1.default();
  */
 router.post("/login", userController_1.login);
 /**
+ * 测试接口
+ */
+router.get("/test", userController_1.test);
+/**
  * 生成临时密码
  */
 router.get("/generate-temp-password", userController_1.generateRandomPassword);

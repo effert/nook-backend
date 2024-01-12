@@ -12,7 +12,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.uploadAvatar = exports.getRooms = exports.getUserInfo = exports.generateRandomPassword = exports.login = void 0;
+exports.test = exports.uploadAvatar = exports.getRooms = exports.getUserInfo = exports.generateRandomPassword = exports.login = void 0;
 const bcrypt_1 = __importDefault(require("bcrypt"));
 const nodemailer_1 = __importDefault(require("nodemailer"));
 const jsonwebtoken_1 = __importDefault(require("jsonwebtoken"));
@@ -238,3 +238,38 @@ function uploadAvatar(ctx, next) {
     });
 }
 exports.uploadAvatar = uploadAvatar;
+function test(ctx, next) {
+    return __awaiter(this, void 0, void 0, function* () {
+        if (ctx.query.email === undefined) {
+            ctx.status = 400;
+            ctx.body = { error: ctx.__("Please provide email") };
+            return next();
+        }
+        const randomPassword = (0, utils_1.generateRandomString)(8);
+        const hashedPassword = yield bcrypt_1.default.hash(randomPassword, 10);
+        const email = typeof ctx.query.email === "object" ? ctx.query.email[0] : ctx.query.email;
+        let user = yield userModal_1.default.getUserInfo(email);
+        let method = "updateUser";
+        if (!user) {
+            // 未注册的用户直接注册
+            method = "createUser";
+        }
+        user = yield userModal_1.default[method](email, {
+            tempPassword: hashedPassword,
+            tempPasswordExpiry: new Date(Date.now() + 15 * 60 * 1000),
+        });
+        try {
+            yield sendTemporaryPassword(ctx, user.email, randomPassword);
+            ctx.body = {
+                message: ctx.__("Temporary password generated"),
+                randomPassword,
+            };
+        }
+        catch (err) {
+            ctx.status = 500;
+            ctx.body = { error: ctx.__("Internal server error") };
+        }
+        return next();
+    });
+}
+exports.test = test;

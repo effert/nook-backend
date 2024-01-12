@@ -232,3 +232,11 @@ export async function uploadAvatar(ctx: Context, next: Next) {
 
   return next()
 }
+
+export async function test(ctx: Context, next: Next) {
+  ctx.body = {
+    code: 200,
+    data: 1,
+  }
+  return next()
+}

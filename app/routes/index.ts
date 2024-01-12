@@ -6,6 +6,7 @@ import {
   generateRandomPassword,
   getRooms,
   uploadAvatar,
+  test,
 } from "@/controllers/userController"
 import koaBody from "koa-body"
 import path from "path"
@@ -22,14 +23,7 @@ router.post("/login", login)
 /**
  * 测试接口
  */
-router.get("/test", async (ctx) => {
-  ctx.body = {
-    code: 0,
-    data: {
-      name: "test",
-    },
-  }
-})
+router.get("/test", test)
 /**
  * 生成临时密码
  */
