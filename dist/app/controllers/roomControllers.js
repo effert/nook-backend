@@ -23,7 +23,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.setRoomAi = exports.getRoomAi = exports.getRoomMembers = exports.modifyRoomInfo = exports.getRoomInfo = exports.createRoom = void 0;
+exports.setRoomAiEnabled = exports.setRoomAi = exports.getRoomAi = exports.getRoomMembers = exports.modifyRoomInfo = exports.getRoomInfo = exports.createRoom = void 0;
 const roomModal_1 = __importDefault(require("@/models/roomModal"));
 const utils_1 = require("@/utils");
 const bcrypt_1 = __importDefault(require("bcrypt"));
@@ -183,3 +183,35 @@ function setRoomAi(ctx, next) {
     });
 }
 exports.setRoomAi = setRoomAi;
+/**
+ * 设置房间是否可以开启ai
+ * @param ctx
+ * @returns boolean
+ */
+function setRoomAiEnabled(ctx, next) {
+    return __awaiter(this, void 0, void 0, function* () {
+        const { id } = ctx.params;
+        const { id: userId } = ctx.state.user;
+        const { aiEnabled } = ctx.request.body;
+        const room = yield roomModal_1.default.getRoomInfo(id);
+        if (!room) {
+            ctx.status = 404;
+            ctx.body = { error: ctx.__("Room not found") };
+            return next();
+        }
+        if (userId != 1) {
+            ctx.status = 403;
+            ctx.body = { error: ctx.__("Access denied") };
+            return next();
+        }
+        const updatedRoom = yield roomModal_1.default.updateRoom(id, {
+            aiEnabled,
+        });
+        ctx.body = {
+            code: 200,
+            data: updatedRoom,
+        };
+        return next();
+    });
+}
+exports.setRoomAiEnabled = setRoomAiEnabled;

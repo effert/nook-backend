@@ -5,6 +5,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 Object.defineProperty(exports, "__esModule", { value: true });
 const koa_router_1 = __importDefault(require("koa-router"));
 const roomControllers_1 = require("@/controllers/roomControllers");
+const auth_1 = __importDefault(require("@/middlewares/auth"));
 const router = new koa_router_1.default({
     prefix: "/room",
 });
@@ -38,4 +39,8 @@ router.get("/:id/ai", roomControllers_1.getRoomAi);
  * @returns boolean
  */
 router.put("/:id/ai", roomControllers_1.setRoomAi);
+/**
+ * 设置房间是否可以开启ai
+ */
+router.put("/:id/ai-enabled", auth_1.default, roomControllers_1.setRoomAiEnabled);
 exports.default = router;
