@@ -10,7 +10,7 @@
     "dev": "NODE_ENV=dev nodemon -r ./alias-config.js --exec ts-node index.ts",
     "build": "tsc",
     "start": "NODE_ENV=production node -r ./alias-config.js dist/index.js",
-    "prepare": "husky install"
+    "postinstall": "husky install"
   },
   "devDependencies": {
     "@types/bcrypt": "^5.0.2",
