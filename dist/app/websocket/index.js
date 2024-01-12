@@ -13,7 +13,6 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 const ws_1 = __importDefault(require("ws"));
-const http_1 = __importDefault(require("http"));
 const url_1 = __importDefault(require("url"));
 const jsonwebtoken_1 = __importDefault(require("jsonwebtoken"));
 const roomModal_1 = __importDefault(require("@/models/roomModal"));
@@ -24,9 +23,6 @@ const cookie_1 = __importDefault(require("cookie"));
 const websocketLocales_1 = __importDefault(require("@/locales/websocketLocales"));
 const openai_1 = __importDefault(require("@/openai"));
 const log_1 = __importDefault(require("@/utils/log"));
-const server = http_1.default.createServer();
-const wss = new ws_1.default.Server({ noServer: true });
-const PORT = process.env.SOCKET_PORT || 8080;
 // member 表示成员变动 update表示房间信息变动
 var MessageType;
 (function (MessageType) {
@@ -75,7 +71,7 @@ function getRoomId(request) {
     const roomId = pathname.substring(1);
     return roomId;
 }
-function createWebsocket() {
+function createWebsocket(wss, server) {
     wss.on("connection", function connection(ws, request) {
         return __awaiter(this, void 0, void 0, function* () {
             const cookies = cookie_1.default.parse(request.headers.cookie || "");
@@ -280,18 +276,5 @@ function createWebsocket() {
             }
         });
     });
-    server.on("upgrade", function upgrade(request, socket, head) {
-        var _a;
-        if ((_a = request.url) === null || _a === void 0 ? void 0 : _a.startsWith("/")) {
-            wss.handleUpgrade(request, socket, head, function done(ws) {
-                wss.emit("connection", ws, request);
-            });
-        }
-        else {
-            socket.destroy();
-        }
-    });
-    server.listen(PORT);
-    console.log(`WebSocket 服务运行在 ${PORT} 端口`);
 }
 exports.default = createWebsocket;

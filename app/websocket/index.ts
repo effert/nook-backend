@@ -1,6 +1,5 @@
 import WebSocket from "ws"
-import http from "http"
-import { IncomingMessage } from "http"
+import http, { IncomingMessage } from "http"
 import url from "url"
 import jwt, { JwtPayload } from "jsonwebtoken"
 import RoomModal from "@/models/roomModal"
@@ -12,10 +11,6 @@ import cookie from "cookie"
 import websocketLocales from "@/locales/websocketLocales"
 import openAi from "@/openai"
 import logger from "@/utils/log"
-
-const server = http.createServer()
-const wss = new WebSocket.Server({ noServer: true })
-const PORT = process.env.SOCKET_PORT || 8080
 
 interface Room {
   [roomId: string]: Set<WebSocket>
@@ -77,7 +72,10 @@ function getRoomId(request: IncomingMessage) {
   return roomId
 }
 
-export default function createWebsocket() {
+export default function createWebsocket(
+  wss: WebSocket.Server,
+  server: http.Server
+) {
   wss.on("connection", async function connection(ws, request: IncomingMessage) {
     const cookies = cookie.parse(request.headers.cookie || "")
     const locale = cookies["locale"] || "en"
@@ -296,17 +294,4 @@ export default function createWebsocket() {
       }
     }
   })
-
-  server.on("upgrade", function upgrade(request, socket, head) {
-    if (request.url?.startsWith("/")) {
-      wss.handleUpgrade(request, socket, head, function done(ws) {
-        wss.emit("connection", ws, request)
-      })
-    } else {
-      socket.destroy()
-    }
-  })
-
-  server.listen(PORT)
-  console.log(`WebSocket 服务运行在 ${PORT} 端口`)
 }

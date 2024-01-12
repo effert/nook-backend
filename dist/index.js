@@ -4,7 +4,9 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 require("module-alias/register");
+const ws_1 = __importDefault(require("ws"));
 const koa_1 = __importDefault(require("koa"));
+const http_1 = __importDefault(require("http"));
 const path_1 = __importDefault(require("path"));
 const koa_static_1 = __importDefault(require("koa-static"));
 const koa_bodyparser_1 = __importDefault(require("koa-bodyparser"));
@@ -20,6 +22,7 @@ const room_1 = __importDefault(require("@/routes/room"));
 const message_1 = __importDefault(require("@/routes/message"));
 const common_1 = __importDefault(require("@/routes/common"));
 const app = new koa_1.default();
+const server = http_1.default.createServer(app.callback());
 dotenv_1.default.config();
 app.use((0, koa_helmet_1.default)());
 app.use((0, cors_1.default)({
@@ -36,8 +39,9 @@ app.use(index_1.default.routes()).use(index_1.default.allowedMethods());
 app.use(room_1.default.routes()).use(room_1.default.allowedMethods());
 app.use(message_1.default.routes()).use(message_1.default.allowedMethods());
 app.use(common_1.default.routes()).use(common_1.default.allowedMethods());
-(0, websocket_1.default)();
+const wss = new ws_1.default.Server({ server });
+(0, websocket_1.default)(wss, server);
 const PORT = process.env.PORT || 8000;
-app.listen(PORT, () => {
+server.listen(PORT, () => {
     console.log(`Server listening on port: ${PORT}`);
 });

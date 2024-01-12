@@ -5,3 +5,5 @@
    `npx prisma studio`
 3. complete .env
 4. yarn dev
+
+package,json 中的\_moduleAliases 字段 dev 时改成{"@": "app"}，build 是{"@": "dist/app"}

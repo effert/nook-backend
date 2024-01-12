@@ -1,5 +1,7 @@
 import "module-alias/register"
+import WebSocket from "ws"
 import Koa from "koa"
+import http from "http"
 import path from "path"
 import staticServer from "koa-static"
 import bodyParser from "koa-bodyparser"
@@ -16,6 +18,7 @@ import messageRouter from "@/routes/message"
 import commonRouter from "@/routes/common"
 
 const app = new Koa()
+const server = http.createServer(app.callback())
 
 dotenv.config()
 app.use(helmet())
@@ -36,8 +39,10 @@ app.use(roomRouter.routes()).use(roomRouter.allowedMethods())
 app.use(messageRouter.routes()).use(messageRouter.allowedMethods())
 app.use(commonRouter.routes()).use(commonRouter.allowedMethods())
 
-createWebsocket()
+const wss = new WebSocket.Server({ server })
+
+createWebsocket(wss, server)
 const PORT = process.env.PORT || 8000
-app.listen(PORT, () => {
+server.listen(PORT, () => {
   console.log(`Server listening on port: ${PORT}`)
 })
