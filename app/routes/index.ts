@@ -8,7 +8,6 @@ import {
   uploadAvatar,
 } from "@/controllers/userController"
 import koaBody from "koa-body"
-import path from "path"
 
 const router = new Router()
 

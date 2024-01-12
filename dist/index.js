@@ -3,7 +3,6 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-require("module-alias/register");
 const ws_1 = __importDefault(require("ws"));
 const koa_1 = __importDefault(require("koa"));
 const http_1 = __importDefault(require("http"));

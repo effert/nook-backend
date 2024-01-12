@@ -1,4 +1,3 @@
-import "module-alias/register"
 import WebSocket from "ws"
 import Koa from "koa"
 import http from "http"
@@ -20,6 +19,7 @@ import commonRouter from "@/routes/common"
 const app = new Koa()
 const server = http.createServer(app.callback())
 
+console.log(111)
 dotenv.config()
 app.use(helmet())
 app.use(

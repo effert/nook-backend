@@ -7,12 +7,9 @@
   "license": "MIT",
   "private": true,
   "scripts": {
-    "dev": "nodemon --exec ts-node index.ts",
+    "dev": "NODE_ENV=dev nodemon -r ./alias-config.js --exec ts-node index.ts",
     "build": "tsc",
-    "start": "node dist/index.js"
-  },
-  "_moduleAliases": {
-    "@": "dist/app"
+    "start": "NODE_ENV=production node -r ./alias-config.js dist/index.js"
   },
   "devDependencies": {
     "@types/bcrypt": "^5.0.2",
@@ -26,6 +23,7 @@
     "@types/lodash": "^4.14.202",
     "@types/nodemailer": "^6.4.14",
     "@types/ws": "^8.5.10",
+    "husky": "^8.0.3",
     "nodemon": "^3.0.2",
     "prisma": "^5.7.0",
     "ts-node": "^10.9.1",
