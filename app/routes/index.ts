@@ -20,6 +20,17 @@ const router = new Router()
 router.post("/login", login)
 
 /**
+ * 测试接口
+ */
+router.get("/test", async (ctx) => {
+  ctx.body = {
+    code: 0,
+    data: {
+      name: "test",
+    },
+  }
+})
+/**
  * 生成临时密码
  */
 router.get("/generate-temp-password", generateRandomPassword)
