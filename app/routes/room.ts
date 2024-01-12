@@ -6,7 +6,9 @@ import {
   getRoomMembers,
   getRoomAi,
   setRoomAi,
+  setRoomAiEnabled,
 } from "@/controllers/roomControllers"
+import authMiddleware from "@/middlewares/auth"
 
 const router = new Router({
   prefix: "/room",
@@ -47,5 +49,10 @@ router.get("/:id/ai", getRoomAi)
  * @returns boolean
  */
 router.put("/:id/ai", setRoomAi)
+
+/**
+ * 设置房间是否可以开启ai
+ */
+router.put("/:id/ai-enabled", authMiddleware, setRoomAiEnabled)
 
 export default router

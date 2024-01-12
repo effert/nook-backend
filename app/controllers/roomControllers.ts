@@ -154,3 +154,33 @@ export async function setRoomAi(ctx: Context, next: Next) {
   }
   return next()
 }
+
+/**
+ * 设置房间是否可以开启ai
+ * @param ctx
+ * @returns boolean
+ */
+export async function setRoomAiEnabled(ctx: Context, next: Next) {
+  const { id } = ctx.params
+  const { id: userId } = ctx.state.user
+  const { aiEnabled } = ctx.request.body as { aiEnabled: boolean }
+  const room = await RoomModal.getRoomInfo(id)
+  if (!room) {
+    ctx.status = 404
+    ctx.body = { error: ctx.__("Room not found") }
+    return next()
+  }
+  if (userId != 1) {
+    ctx.status = 403
+    ctx.body = { error: ctx.__("Access denied") }
+    return next()
+  }
+  const updatedRoom = await RoomModal.updateRoom(id, {
+    aiEnabled,
+  })
+  ctx.body = {
+    code: 200,
+    data: updatedRoom,
+  }
+  return next()
+}
