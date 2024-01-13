@@ -192,6 +192,7 @@ function setRoomAiEnabled(ctx, next) {
     return __awaiter(this, void 0, void 0, function* () {
         const { id } = ctx.params;
         const { id: userId } = ctx.state.user;
+        console.log(11);
         const { aiEnabled } = ctx.request.body;
         const room = yield roomModal_1.default.getRoomInfo(id);
         if (!room) {
