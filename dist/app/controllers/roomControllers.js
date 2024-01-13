@@ -74,7 +74,7 @@ function getRoomInfo(ctx, next) {
             try {
                 isPasswordCorrect =
                     password === room.password ||
-                    (yield bcrypt_1.default.compare(password, room.password));
+                        (yield bcrypt_1.default.compare(password, room.password));
             }
             catch (err) {
                 console.log(err);
@@ -191,7 +191,6 @@ exports.setRoomAi = setRoomAi;
 function setRoomAiEnabled(ctx, next) {
     return __awaiter(this, void 0, void 0, function* () {
         const { id } = ctx.params;
-        console.log(id);
         const { id: userId } = ctx.state.user;
         const { aiEnabled } = ctx.request.body;
         const room = yield roomModal_1.default.getRoomInfo(id);
