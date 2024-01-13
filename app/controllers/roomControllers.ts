@@ -163,6 +163,7 @@ export async function setRoomAi(ctx: Context, next: Next) {
 export async function setRoomAiEnabled(ctx: Context, next: Next) {
   const { id } = ctx.params
   const { id: userId } = ctx.state.user
+  console.log(11)
   const { aiEnabled } = ctx.request.body as { aiEnabled: boolean }
   const room = await RoomModal.getRoomInfo(id)
   if (!room) {
