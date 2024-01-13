@@ -143,8 +143,9 @@ export async function generateRandomPassword(ctx: Context, next: Next) {
   try {
     await sendTemporaryPassword(ctx, user!.email, randomPassword)
     ctx.body = {
+      code: 200,
       message: ctx.__("Temporary password generated"),
-      randomPassword,
+      // randomPassword,
     }
   } catch (err) {
     ctx.status = 500
