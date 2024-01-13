@@ -145,8 +145,9 @@ function generateRandomPassword(ctx, next) {
         try {
             yield sendTemporaryPassword(ctx, user.email, randomPassword);
             ctx.body = {
+                code: 200,
                 message: ctx.__("Temporary password generated"),
-                randomPassword,
+                // randomPassword,
             };
         }
         catch (err) {
