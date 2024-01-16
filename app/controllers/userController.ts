@@ -6,6 +6,7 @@ import UserModal from "@/models/userModal"
 import { generateRandomString } from "@/utils"
 import path from "path"
 import fs from "fs"
+import { omit } from "lodash"
 
 const { SECRET_KEY = "", EMAIL_HOST_USER, EMAIL_HOST_PASSWORD } = process.env
 
@@ -168,9 +169,8 @@ export async function getUserInfo(ctx: Context, next: Next) {
     return next()
   }
 
-  user.password = null
   ctx.body = {
-    user,
+    user: omit(user, ["password", "tempPassword", "tempPasswordExpiry"]),
   }
   return next()
 }
