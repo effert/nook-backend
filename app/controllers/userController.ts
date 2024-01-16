@@ -66,6 +66,11 @@ export async function login(ctx: Context, next: Next) {
     }
     // 正常密码
     if (await bcrypt.compare(password, user.password!)) {
+      // 清除临时密码
+      UserModal.updateUser(user.email, {
+        tempPassword: null,
+        tempPasswordExpiry: null,
+      })
       const token = jwt.sign({ id: user.id, email: user.email }, SECRET_KEY, {
         expiresIn: "24h",
       })

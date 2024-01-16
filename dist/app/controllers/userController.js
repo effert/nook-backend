@@ -20,6 +20,7 @@ const userModal_1 = __importDefault(require("@/models/userModal"));
 const utils_1 = require("@/utils");
 const path_1 = __importDefault(require("path"));
 const fs_1 = __importDefault(require("fs"));
+const lodash_1 = require("lodash");
 const { SECRET_KEY = "", EMAIL_HOST_USER, EMAIL_HOST_PASSWORD } = process.env;
 /**
  * 用户登录，未注册的话先注册再登录
@@ -171,9 +172,8 @@ function getUserInfo(ctx, next) {
             ctx.body = { error: ctx.__("User not found") };
             return next();
         }
-        user.password = null;
         ctx.body = {
-            user,
+            user: (0, lodash_1.omit)(user, ["password", "tempPassword", "tempPasswordExpiry"]),
         };
         return next();
     });
