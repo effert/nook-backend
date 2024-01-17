@@ -76,6 +76,11 @@ function login(ctx, next) {
             }
             // 正常密码
             if (yield bcrypt_1.default.compare(password, user.password)) {
+                // 清除临时密码
+                userModal_1.default.updateUser(user.email, {
+                    tempPassword: null,
+                    tempPasswordExpiry: null,
+                });
                 const token = jsonwebtoken_1.default.sign({ id: user.id, email: user.email }, SECRET_KEY, {
                     expiresIn: "24h",
                 });
