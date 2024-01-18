@@ -63,7 +63,7 @@
     if (fileInput.files.length > 0) {
       formData.append('file', fileInput.files[0]);
 
-      fetch('http://localhost:8000/common/upload', {
+      fetch('http://localhost:3002/api/message/import?roomId=4af3f4', {
         method: 'POST',
         body: formData
       })
